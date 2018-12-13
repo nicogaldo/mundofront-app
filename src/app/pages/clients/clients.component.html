@@ -1,0 +1,149 @@
+<div class="container-fluid px-0">
+	<div class="widget-list">
+		<div class="row">
+			<div class="widget-holder col-md-12">
+				<div class="widget-bg">
+					<div class="widget-heading widget-heading-border">
+						<h6 class="mb-0 mr-auto">Clientes ({{ totalRegistros }})</h6>
+						<button (click)="nuevoCliente()" class="btn btn-primary text-uppercase">Nuevo Cliente</button>
+					</div>
+					<!-- /.widget-heading -->
+					<div class="widget-body">
+						
+						<div class="d-block float-left">
+							<label>Mostrar
+								<select (change)="onChange($event.target.value)" name="myTable_length" class="">
+									<option *ngFor="let i of verDatos" value="{{i}}">{{i}}</option>
+								</select>
+							resultados</label>
+						</div>
+						
+						<div class="d-block float-right">
+							<div class="form-group mb-1">
+								<input #search (keyup.enter)="buscarDatos(search.value)" type="search" class="form-control form-control-sm" placeholder="Buscar">
+							</div>
+						</div>
+						
+						<table class="table table-bordered table-hover">
+							<thead class="thead-light">
+								<tr>
+									<th scope="col">Nombre</th>
+									<th scope="col">Teléfono</th>
+									<th scope="col">Email</th>
+								</tr>
+							</thead>
+							<tbody>
+								
+								<tr *ngIf="cargando" role="row" class="text-center">
+									<td colspan="3"><i class="fas fa-circle-notch fa-spin fa-2x"></i></td>
+								</tr>
+								
+								<tr *ngIf="(pager.totalItems === 0 || totalRegistros === 0) && !cargando" role="row" class="text-center">
+									<td colspan="3"><i class="far fa-meh fa-2x"></i> No se encontraron resultados</td>
+								</tr>
+								
+								<ng-container *ngIf="pager.totalItems > 0 && !cargando">
+									<tr [routerLink]="['/cliente', c._id]" *ngFor="let c of clientes" id="{{c._id}}" class="cursor-pointer">
+										<td>{{ c.nombre }} {{ c.apellido }}</td>
+										<td>{{ c.telefono }}</td>
+										<td>{{ c.email }}</td>
+										
+									</tr>
+								</ng-container>
+								
+							</tbody>
+						</table>
+						
+						<nav aria-label="Page navigation example">
+							<ul class="pagination">
+								<li (click)="setPage(pager.currentPage - 1)" [ngClass]="{disabled:pager.currentPage === 1}" class="page-item"><a class="page-link">Anterior</a></li>
+								
+								<li *ngFor="let page of pager.pages" (click)="setPage(page)" [ngClass]="{active:pager.currentPage === page}" class="page-item"><a class="page-link"> {{ page }} </a></li>
+								
+								<li (click)="setPage(pager.currentPage + 1)" [ngClass]="{disabled:pager.currentPage === pager.totalPages}" class="page-item"><a class="page-link">Siguiente</a></li>
+							</ul>
+						</nav>
+						
+						
+					</div>
+					<!-- /.widget-body -->
+				</div>
+				<!-- /.widget-bg -->
+			</div>
+			<!-- /.widget-holder -->
+		</div>
+		<!-- /.row -->
+	</div>
+	<!-- /.widget-list -->
+</div>
+
+<ngx-smart-modal #nuevoClienteModal (onAnyCloseEvent)="forma.reset()" identifier="nuevoClienteModal" [closable]="false">
+	
+	<div class="modal-header px-0 pt-0 pb-2 m-0">
+		<h6 class="modal-title">Nuevo Cliente</h6>
+		<button (click)="nuevoClienteModal.close()" type="button" class="close" data-dismiss="modal" aria-label="Close" >
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	
+	<div class="modal-body pb-0">
+		
+		<form novalidate [formGroup]="forma" (ngSubmit)="guardarCliente()" class="form-material">
+			
+			<div class="row">
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group" [ngClass]="{'has-danger': forma.get('nombre').errors?.required && forma.get('nombre').touched }">
+						<input formControlName="nombre" class="form-control" type="text" id="nombre">
+						<label for="nombre">Nombre</label>
+						
+						<div *ngIf="forma.get('nombre').errors?.required && forma.get('nombre').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<input formControlName="apellido" class="form-control" type="text" id="apellido">
+						<label for="apellido">Apellido</label>
+						
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group" [ngClass]="{'has-danger': forma.get('email').errors?.pattern}">
+						<input formControlName="email" class="form-control" type="email" id="email">
+						<label for="email">Email</label>
+						
+						<div *ngIf="forma.get('email').errors?.pattern && forma.get('email').touched" class="small form-control-feedback">
+							Ingrese un email valido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<input formControlName="telefono" class="form-control" type="text" id="telefono">
+						<label for="telefono">Teléfono</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group">
+						<input formControlName="detalles" class="form-control" type="text" id="detalles">
+						<label for="detalles">Detalles</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-12">
+					<div class="text-right">
+						<button [disabled]="!forma.valid" class="btn btn-primary ripple" type="submit">Continuar</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</ngx-smart-modal>

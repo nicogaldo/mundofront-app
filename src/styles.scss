@@ -1,0 +1,163 @@
+/* You can add global styles to this file, and also import other style files */
+html,
+body {
+    height: 100%;
+}
+
+/*==============================
+=            Modals            =
+==============================*/
+.nsm-dialog {
+    max-width: 700px!important;
+}
+
+/*=============================
+=            Forms            =
+=============================*/
+form .has-danger {
+    .form-control {
+        background-image: linear-gradient(#1976d2, #1976d2), linear-gradient(#f33, #f33);
+    }
+    .form-control-feedback {
+        color: red;
+    }
+}
+
+/*=================================
+=            NG Select            =
+=================================*/
+.form-material .form-group.form-select {
+    > label {
+        top: 0;
+    }
+
+    .ng-select {
+        .ng-select-container {
+            min-height: 40px;
+
+            .ng-value-container {
+                padding: .5rem 0 0 0;
+
+                border: 0;
+            }
+
+            &:after {
+                border-bottom: 1px solid rgb(206, 212, 218)!important;
+            }
+        }
+        &.ng-select-focused {
+            .ng-select-container:after {
+                border-color: #1976d2;
+            }
+        }
+    }
+
+    .ng-select-disabled {
+        .ng-select-container {
+            .ng-value-container .ng-value {
+                color: #333;
+            }
+
+            &:after {
+                border-bottom: 0!important;
+            }
+        }
+    }
+
+
+    .ng-dropdown-panel.ng-select-top {
+        bottom: calc(100% - .25em);
+    }
+    .ng-dropdown-panel.ng-select-bottom {
+        top: calc(100% - .25em);
+    }
+}
+
+/*====================================
+=            FullCalendar            =
+====================================*/
+.fc-view-container {
+    min-width: 100%!important;
+}
+
+.fc-event,
+.fc-list-item {
+    cursor: pointer;
+}
+
+.fc-event.cancel .fc-title,
+.fc-event.cancel .fc-time,
+.fc-list-item.cancel > * {
+    text-decoration: line-through;
+}
+
+/*==================================
+=            DataTables            =
+==================================*/
+
+.dataTables_wrapper {
+    .dt-buttons {
+        float: right;
+        margin-left: .5em;
+    }
+
+    .dataTables_length {
+        float: left;
+        margin: 0;
+        select {
+            width: 50px!important;
+
+            font-size: 100%;
+        }
+    }
+
+    .dataTables_filter {
+        float: right;
+    }
+
+    table.dataTable {
+        margin-bottom: 1.5em!important;
+
+        th,
+        td {
+            padding: .3rem!important;
+        }
+
+        thead {
+            tr > th.sorting_asc,
+            tr > th.sorting_desc,
+            tr > th.sorting,
+            tr > td.sorting_asc,
+            tr > td.sorting_desc,
+            tr > td.sorting {
+                padding-right: 23px;
+            }
+
+            .sorting:after,
+            .sorting_asc:after,
+            .sorting_desc:after,
+            .sorting_asc_disabled:after,
+            .sorting_desc_disabled:after {
+                display: none;
+            }
+
+            .sorting:before,
+            .sorting_asc:before,
+            .sorting_desc:before {
+                top: 20%;
+                right: 0;
+
+                opacity: .4;
+            }
+        }
+    }
+
+    .dataTables_info {
+        float: left;
+        margin-top: 0;
+    }
+
+    .dataTables_paginate {
+        border: none;
+    }
+}

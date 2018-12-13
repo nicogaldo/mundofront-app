@@ -1,0 +1,256 @@
+<div class="container-fluid px-0">
+	<div class="widget-list">
+		<div class="row">
+			<div class="widget-holder col-md-12">
+				<div class="widget-bg">
+					<div class="widget-heading widget-heading-border">
+						<h6 class="mb-0 mr-auto">Combos ({{ totalRegistros }})</h6>
+						<button (click)="nuevoCombo()" class="btn btn-primary text-uppercase">Nuevo Combo</button>
+					</div>
+					<!-- /.widget-heading -->
+					<div class="widget-body">
+						
+						<div class="d-block float-left">
+							<label>Mostrar
+								<select (change)="onChange($event.target.value)" name="myTable_length" class="">
+									<option *ngFor="let i of verDatos" value="{{i}}">{{i}}</option>
+								</select>
+							resultados</label>
+						</div>
+						
+						<div class="d-block float-right">
+							<div class="form-group mb-1">
+								<input #search (keyup.enter)="buscarDatos(search.value)" type="search" class="form-control form-control-sm" placeholder="Buscar">
+							</div>
+						</div>
+						
+						<table class="table table-bordered table-hover">
+							<thead class="thead-light">
+								<tr>
+									<th scope="col">Nombre</th>
+									<th scope="col">Descripcion</th>
+									<th scope="col">Lugar</th>
+									<th scope="col">Precio</th>
+								</tr>
+							</thead>
+							<tbody>
+								
+								<tr *ngIf="cargando" role="row" class="text-center">
+									<td colspan="4"><i class="fas fa-circle-notch fa-spin fa-2x"></i></td>
+								</tr>
+								
+								<tr *ngIf="(pager.totalItems === 0 || totalRegistros === 0) && !cargando" role="row" class="text-center">
+									<td colspan="4"><i class="far fa-meh fa-2x"></i> No se encontraron resultados</td>
+								</tr>
+								
+								<ng-container *ngIf="pager.totalItems > 0 && !cargando">
+									<tr (click)="verCombo( c._id )" *ngFor="let c of combos" id="{{c._id}}" class="cursor-pointer">
+										<td>{{ c.name }}</td>
+										<td>{{ c.desc }}</td>
+										<td>{{ c.place.name }}</td>
+										<td>{{ c.price }}</td>
+									</tr>
+								</ng-container>
+								
+							</tbody>
+						</table>
+						
+						<nav aria-label="Page navigation example">
+							<ul class="pagination">
+								<li (click)="setPage(pager.currentPage - 1)" [ngClass]="{disabled:pager.currentPage === 1}" class="page-item"><a class="page-link">Anterior</a></li>
+								
+								<li *ngFor="let page of pager.pages" (click)="setPage(page)" [ngClass]="{active:pager.currentPage === page}" class="page-item"><a class="page-link"> {{ page }} </a></li>
+								
+								<li (click)="setPage(pager.currentPage + 1)" [ngClass]="{disabled:pager.currentPage === pager.totalPages}" class="page-item"><a class="page-link">Siguiente</a></li>
+							</ul>
+						</nav>
+						
+						
+					</div>
+					<!-- /.widget-body -->
+				</div>
+				<!-- /.widget-bg -->
+			</div>
+			<!-- /.widget-holder -->
+		</div>
+		<!-- /.row -->
+	</div>
+	<!-- /.widget-list -->
+</div>
+
+<ngx-smart-modal #nuevoComboModal (onAnyCloseEvent)="forma.reset()" identifier="nuevoComboModal" [closable]="false">
+	
+	<div class="modal-header px-0 pt-0 pb-2 m-0">
+		<h6 class="modal-title">Nuevo Combo</h6>
+		<button (click)="nuevoComboModal.close()" type="button" class="close" data-dismiss="modal" aria-label="Close" >
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	
+	<div class="modal-body pb-0">
+		
+		<form novalidate [formGroup]="forma" (ngSubmit)="guardarCombo()" class="form-material">
+			
+			<div class="row">
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group" [ngClass]="{'has-danger': forma.get('name').errors?.required && forma.get('name').touched }">
+						<input formControlName="name" class="form-control" type="text" id="name" placeholder="Nombre del lugar" required>
+						<label for="name">Nombre</label>
+						
+						<div *ngIf="forma.get('name').errors?.required && forma.get('name').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<input formControlName="desc" class="form-control" type="text" id="desc" placeholder="Nombre del lugar" required>
+						<label for="desc">Descripción</label>
+						
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('place').errors?.required && forma.get('place').touched }">
+						
+						<ng-select [items]="places"
+							[selectOnTab]="true"
+							[loading]="cargandoL"
+							bindValue="_id"
+							bindLabel="name"
+							notFoundText="No se encontraron resultados"
+							formControlName="place"
+							class="p-0"
+							id="place">
+						</ng-select>
+						<label for="place">Lugar</label>
+						
+						<div *ngIf="forma.get('place').errors?.required && forma.get('place').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group" [ngClass]="{'has-danger': forma.get('price').errors?.required && forma.get('price').touched }">
+						<input formControlName="price" class="form-control" type="number" id="price">
+						<label for="price">Precio</label>
+						
+						<div *ngIf="forma.get('price').errors?.required && forma.get('price').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-12">
+					<div class="text-right">
+						<button [disabled]="!forma.valid" class="btn btn-primary ripple" type="submit">Guardar</button>
+					</div>
+				</div>
+			</div>
+		</form>
+		
+	</div>
+</ngx-smart-modal>
+
+<ngx-smart-modal #editarComboModal (onAnyCloseEvent)="removeData()" identifier="editarComboModal" [closable]="false">
+	
+	<div class="modal-header px-0 pt-0 pb-2 m-0">
+		<h5 class="modal-title">{{ titleModal }}</h5>
+		<button (click)="editarComboModal.close()" type="button" class="close" data-dismiss="modal" aria-label="Close" >
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	
+	<div class="modal-body pb-0">
+		
+		<form novalidate [formGroup]="formaEdit" (ngSubmit)="actualizarCombo(formaEdit.value)" class="form-material" [ngClass]="{'only-view': !isEdit}">
+			
+			<div class="row">
+				
+				<div class="col-lg-6 d-none">
+					<div class="form-group">
+						<label for="_id">_id</label>
+						<input formControlName="_id" name="_id" type="text" class="form-control">
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group" [ngClass]="{'has-danger': formaEdit.get('name').errors?.required && formaEdit.get('name').touched }">
+						<input formControlName="name" class="form-control" type="text" id="name" placeholder="Nombre del lugar" required>
+						<label for="name">Nombre</label>
+						
+						<div *ngIf="formaEdit.get('name').errors?.required && formaEdit.get('name').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<input formControlName="desc" class="form-control" type="text" id="desc" placeholder="Nombre del lugar" required>
+						<label for="desc">Descripción</label>
+						
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group form-select" [ngClass]="{'has-danger': formaEdit.get('place').errors?.required && formaEdit.get('place').touched }">
+						
+						<ng-select [items]="places"
+							[selectOnTab]="true"
+							[loading]="cargandoL"
+							bindValue="_id"
+							bindLabel="name"
+							notFoundText="No se encontraron resultados"
+							formControlName="place"
+							class="p-0"
+							id="place">
+						</ng-select>
+						<label for="place">Lugar</label>
+						
+						<div *ngIf="formaEdit.get('place').errors?.required && formaEdit.get('place').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group" [ngClass]="{'has-danger': formaEdit.get('price').errors?.required && formaEdit.get('price').touched }">
+						<input formControlName="price" class="form-control" type="number" id="price">
+						<label for="price">Precio</label>
+						
+						<div *ngIf="formaEdit.get('price').errors?.required && formaEdit.get('price').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-12 form-group mb-0">
+					
+					<div class="clearfix"></div>
+					<hr>
+					<div *ngIf="editarComboModal.hasData()" class="text-right">
+						<button *ngIf="!isEdit" (click)="isEdit = !isEdit;editarCombo()" class="btn btn-secondary" type="button"><i class="fas fa-fw fa-pencil-alt mr-1"></i> Editar Combo</button>
+						
+						<button *ngIf="isEdit" (click)="borrarCombo(editarComboModal.getData())" class="btn btn-danger float-left" type="button"><i class="fas fa-fw fa-trash-alt mr-1"></i> Eliminar Combo</button>
+						
+						<button *ngIf="isEdit" (click)="isEdit = !isEdit;editarCombo()" class="btn btn-secondary mr-2" type="button"><i class="fas fa-fw fa-times mr-1"></i> Cancelar</button>
+						
+						<button *ngIf="isEdit" [disabled]="!formaEdit.valid" class="btn btn-success ripple" type="submit">Guardar</button>
+					</div>
+					
+				</div>
+				
+			</div>
+		</form>
+	</div>
+</ngx-smart-modal>

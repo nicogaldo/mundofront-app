@@ -1,0 +1,363 @@
+<div class="container-fluid px-0">
+	<div class="widget-list">
+		<div class="row">
+			<!-- User Summary -->
+			<div class="col-12 col-md-4 widget-holder widget-full-content">
+				<div class="widget-bg">
+					<div class="widget-body clearfix">
+						<div class="widget-user-profile">
+							<div *ngIf="cliente" class="profile-body">
+								<figure class="profile-user-avatar thumb-md mt-4">
+									<img [src]="cliente.img | imagen" alt="{{ cliente.nombre }}">
+								</figure>
+								<h6 class="h3 profile-user-name">{{ cliente.nombre }} {{ cliente.apellido }}</h6>
+								<!-- <small class="profile-user-address">Los Angeles, California</small> -->
+								<hr class="profile-seperator">
+								<div class="profile-user-description mb-4">
+									
+									
+									<ng-container *ngIf="cliente.telefono && usuario.role != 'USER_ROLE'">
+										<small class="text-muted ">Teléfono</small>
+										<h6 class="mt-0"> {{ cliente.telefono }} </h6>
+									</ng-container>
+									
+									<ng-container *ngIf="cliente.email && usuario.role != 'USER_ROLE'">
+										<small class="text-muted p-t-20 db">Email </small>
+										<h6 class="mt-0"> {{ cliente.email }} </h6>
+									</ng-container>
+									
+									<ng-container *ngIf="cliente.detalles">
+										<small class="text-muted p-t-20 db">Detalle</small>
+										<h6 class="mt-0"> {{ cliente.detalles }} </h6>
+									</ng-container>
+								</div>
+								<!-- /.profile-user-description -->
+								<div class="mb-5">
+									<button (click)="editarCliente()" class="btn btn-outline-primary btn-rounded px-5 text-uppercase fw-700 fs-11">Editar Perfil</button>
+									
+								</div>
+							</div>
+							<!-- /.d-flex -->
+							<!-- /.row -->
+						</div>
+						<!-- /.widget-user-profile -->
+					</div>
+					<!-- /.widget-body -->
+				</div>
+				<!-- /.widget-bg -->
+			</div>
+			<!-- /.widget-holder -->
+			<!-- Tabs Content -->
+			<div class="col-12 col-md-8 mr-b-30">
+				
+				<ul class="nav nav-tabs contact-details-tab">
+					<li class="nav-item">
+						<a href="#homenajeados" class="nav-link active" data-toggle="tab">Homenajeados</a>
+					</li>
+					<li class="nav-item">
+						<a (click)="cargarConsultas()" href="#consultas" class="nav-link" data-toggle="tab">Consultas</a>
+					</li>
+				</ul>
+				
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active" id="homenajeados">
+						<div *ngFor="let h of homenajeados" class="widget-user-activities">
+							<div class="single media">
+								<figure class="single-user-avatar thumb-xs2">
+									<a href="#">
+										<img *ngIf="cliente" class="rounded-circle" [src]="cliente.img | imagen" alt="{{ cliente.nombre }}">
+									</a>
+								</figure>
+								<div class="media-body">
+									<div class="single-header clearfix">
+										<div class="float-left float-right-rtl">
+											<a href="#" class="single-user-name">{{ h.nombre }} {{ h.apellido }}</a>
+										</div>
+										<button (click)="editarHomenajeado(h._id);isEdit = true" class="btn btn-success btn-xs float-right">
+										<i class="fas fa-pencil-alt"></i>&nbsp;editar
+										</button>
+									</div>
+									
+									<p>
+										<span *ngIf="h.nacimiento">Edad: <strong>{{ h.nacimiento | age }} </strong></span><br>
+										<span *ngIf="h.nacimiento">Nacimiento: <strong>{{ h.nacimiento | amLocale:'es' | amFromUtc | amDateFormat:'D MMMM [de ] YYYY' }} </strong></span><br>
+										<span *ngIf="h.colegio">Colegio: <strong>{{ h.colegio }} </strong></span>
+									</p>
+									<!-- /.single-attachment -->
+								</div>
+								<!-- /.media -->
+							</div>
+							<!-- /.single -->
+							
+							<!-- /.media-body -->
+						</div>
+						<!-- /.widget-user-activities -->
+						
+						
+						<div class="widget-user-activities">
+							
+							<div  class="single media">
+								<figure class="single-user-avatar thumb-xs2" style="width: 50px">
+								</figure>
+								<div class="media-body">
+									<div class="single-header clearfix">
+										<div class="float-left float-right-rtl">
+											
+											<button (click)="nuevoHomenajeado();isEdit = false" class="btn btn-outline-success btn-rounded px-5 text-uppercase fw-700 fs-11"><i class="fas fa-plus"></i>&nbsp;Añadir nuevo</button>
+										</div>
+									</div>
+									<!-- /.single-attachment -->
+								</div>
+								<!-- /.media -->
+							</div>
+							<!-- /.single -->
+							
+							<!-- /.media-body -->
+						</div>
+						<!-- /.widget-user-activities -->
+					</div>
+					<!-- /.tab-pane -->
+					<div role="tabpanel" class="tab-pane" id="consultas">
+						
+						<div class="widget-user-activities">
+							
+							<div *ngIf="cargandoC" class="single media">
+								<div class="media-body text-center">
+									<i class="fas fa-circle-notch fa-spin fa-2x"></i>
+								</div>
+							</div>
+							
+							<ng-container *ngIf="!cargandoC">
+								<div *ngFor="let c of consultas" class="single media">
+									
+									<div *ngIf="c.status === 'RESERVADO'" class="single-event-icon bg-success">
+										<i class="far fa-calendar-check"></i>
+									</div>
+									
+									<div *ngIf="c.status === 'CONSULTA'" class="single-event-icon bg-secondary">
+										<i class="far fa-comment-dots"></i>
+									</div>
+									<!-- /.single-event-icon -->
+									<div class="media-body">
+										<div class="single-header clearfix">
+											<div class="float-left">
+												<span *ngIf="c.status === 'CONSULTA'" class="font-weight-bold text-dark mr-2">Consulta</span>
+												<span *ngIf="c.status === 'RESERVADO'" class="font-weight-bold text-dark mr-2">Turno</span>
+												<small class="text-secondary"><i class="far fa-fw fa-clock"></i>&nbsp;{{ c.createdAt | amLocale:'es' | amFromUtc | amDateFormat:'DD/MM/YYYY [-] HH:mm'}}&nbsp;<i class="fas fa-fw fa-headset"></i>&nbsp;{{ c.usuario.nombre }} </small>
+											</div>
+										</div>
+										<ng-container *ngIf="c.date_t">
+											<p class="mb-1"> Reserva: <span class="text-dark">{{ c.date_t | amLocale:'es' | amFromUtc | amDateFormat:'dddd D [de] MMMM[,] YYYY'}} </span></p>
+											<p class="mb-1"> Seña: <span class="text-dark">${{ c.sena_t }} </span></p>
+											<p class="mb-1"> Lugar: <span class="text-dark">{{ c.place_t.name }} - {{ c.turno_t.name }} <small class="text-dark">({{ c.turno_t.from }} - {{ c.turno_t.to }})</small></span></p>
+											<p class="mb-1"> Combo: <span class="text-dark">{{ c.combo_t.name }} </span></p>
+											<p *ngIf="c.detalles_t" class="mb-1"> Detalles: <span class="text-dark">{{ c.detalles_t }} </span></p>
+										</ng-container>
+										<hr *ngIf="c.medio_c && c.date_t" class="border-dashed my-2">
+										<ng-container *ngIf="c.medio_c">
+											<p class="mb-1"> Consultó por: <span class="text-dark">{{ c.place_c.name }} </span></p>
+											<p class="mb-1"> Homenajeado: <span class="text-dark">{{ c.homenajeado_c.nombre }} {{ c.homenajeado_c.apellido }} </span></p>
+											<p class="mb-1"> Medio de contacto: <span class="text-dark">{{ c.medio_c }} </span></p>
+											<p class="mb-1"> ¿Cómo nos conoció?: <span class="text-dark">{{ c.como_c }} </span></p>
+											<p *ngIf="c.detalles_c" class="mb-1"> Detalles: <span class="text-dark">{{ c.detalles_c }} </span></p>
+										</ng-container>
+									</div>
+									<!-- /.media-body -->
+								</div>
+							</ng-container>
+							
+						</div>
+						
+					</div>
+					<!-- /.tab-pane -->
+				</div>
+				<!-- /.tab-content -->
+			</div>
+			<!-- /.col-sm-8 -->
+		</div>
+		
+	</div>
+	
+</div>
+
+<ngx-smart-modal #editarClienteModal (onAnyCloseEvent)="formaEdit.reset()" identifier="editarClienteModal" [closable]="false">
+	
+	<div class="modal-header px-0 pt-0 pb-2 m-0">
+		<h6 class="modal-title">Editar Cliente</h6>
+		<button (click)="editarClienteModal.close()" type="button" class="close" data-dismiss="modal" aria-label="Close" >
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	
+	<div class="modal-body pb-0">
+		
+		<form novalidate [formGroup]="formaEdit" (ngSubmit)="actualizarCliente(formaEdit.value)" class="form-material">
+			
+			<div class="row">
+				
+				<div class="col-lg-6 d-none">
+					
+					<div class="form-group" [ngClass]="{'has-danger': formaEdit.get('_id').errors?.required && formaEdit.get('_id').touched }">
+						<input formControlName="_id" class="form-control" type="text" id="_id">
+						<label for="_id">ID</label>
+						
+						<div *ngIf="formaEdit.get('_id').errors?.required && formaEdit.get('_id').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group" [ngClass]="{'has-danger': formaEdit.get('nombre').errors?.required && formaEdit.get('nombre').touched }">
+						<input formControlName="nombre" class="form-control" type="text" id="nombre">
+						<label for="nombre">Nombre</label>
+						
+						<div *ngIf="formaEdit.get('nombre').errors?.required && formaEdit.get('nombre').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<input formControlName="apellido" class="form-control" type="text" id="apellido">
+						<label for="apellido">Apellido</label>
+						
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group" [ngClass]="{'has-danger': formaEdit.get('email').errors?.pattern}">
+						<input formControlName="email" class="form-control" type="email" id="email">
+						<label for="email">Email</label>
+						
+						<div *ngIf="formaEdit.get('email').errors?.pattern && formaEdit.get('email').touched" class="small form-control-feedback">
+							Ingrese un email valido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<input formControlName="telefono" class="form-control" type="text" id="telefono">
+						<label for="telefono">Teléfono</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group">
+						<input formControlName="detalles" class="form-control" type="text" id="detalles">
+						<label for="detalles">Detalles</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-12">
+					<button (click)="borrarCliente()" class="btn btn-danger ripple" type="button"><i class="fas fa-trash-alt"></i>&nbsp;Eliminar</button>
+					<button [disabled]="!formaEdit.valid" class="btn btn-primary float-right ripple" type="submit"><i class="fas fa-save"></i>&nbsp;Guardar</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</ngx-smart-modal>
+
+<ngx-smart-modal #editarHomenajeadoModal (onAnyCloseEvent)="formaH.reset()" identifier="editarHomenajeadoModal" [closable]="false">
+	
+	<div class="modal-header px-0 pt-0 pb-2 m-0">
+		<h6 class="modal-title">{{ titleModal }} Homenajeado</h6>
+		<button (click)="editarHomenajeadoModal.close()" type="button" class="close" data-dismiss="modal" aria-label="Close" >
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	
+	<div class="modal-body pb-0">
+		
+		<form novalidate [formGroup]="formaH" (ngSubmit)="guardarHomenajeado(formaH.value)" class="form-material">
+			
+			<div class="row">
+				
+				<div class="col-lg-6 d-none">
+					
+					<div class="form-group" [ngClass]="{'has-danger': formaH.get('_id').errors?.required && formaH.get('_id').touched }">
+						<input formControlName="_id" class="form-control" type="text" id="_id">
+						<label for="_id">Mamá - Papá</label>
+						
+						<div *ngIf="formaH.get('_id').errors?.required && formaH.get('_id').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6 d-none">
+					
+					<div class="form-group" [ngClass]="{'has-danger': formaH.get('parent').errors?.required && formaH.get('parent').touched }">
+						<input formControlName="parent" class="form-control" type="text" id="parent">
+						<label for="parent">Mamá - Papá</label>
+						
+						<div *ngIf="formaH.get('parent').errors?.required && formaH.get('parent').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group" [ngClass]="{'has-danger': formaH.get('nombre').errors?.required && formaH.get('nombre').touched }">
+						<input formControlName="nombre" class="form-control" type="text" id="nombre">
+						<label for="nombre">Nombre</label>
+						
+						<div *ngIf="formaH.get('nombre').errors?.required && formaH.get('nombre').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<input formControlName="apellido" class="form-control" type="text" id="apellido">
+						<label for="apellido">Apellido</label>
+						
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<input formControlName="nacimiento" class="form-control" type="date" id="nacimiento">
+						<label for="nacimiento">Fecha de Nacimiento</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group form-select">
+						
+						<ng-select
+							[selectOnTab]="true"
+							notFoundText="No se encontraron resultados"
+							formControlName="genero"
+							class="p-0"
+							id="genero">
+							<ng-option value="Femenino">Femenino</ng-option>
+							<ng-option value="Masculino">Masculino</ng-option>
+						</ng-select>
+						
+						<label for="genero">Género</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					
+					<div class="form-group">
+						<input formControlName="colegio" class="form-control" type="text" id="colegio">
+						<label for="colegio">Colegio</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-12">
+					<button *ngIf="isEdit" (click)="borrarHomenajeado(formaH.value)" class="btn btn-danger ripple" type="button"><i class="fas fa-trash-alt"></i>&nbsp;Eliminar</button>
+					<button [disabled]="!formaH.valid" class="btn btn-primary float-right ripple" type="submit"><i class="fas fa-save"></i>&nbsp;Guardar</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</ngx-smart-modal>

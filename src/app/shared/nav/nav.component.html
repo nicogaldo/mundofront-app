@@ -1,0 +1,55 @@
+<nav class="navbar">
+  <div class="container-fluid px-0 align-items-stretch">
+    <!-- Logo Area -->
+    <div class="navbar-header">
+      <a href="index.html" class="navbar-brand">
+        <img class="logo-expand" alt="" src="../assets/images/logo-dark.png">
+        <img class="logo-collapse" alt="" src="../assets/images/logo-collapse.png">
+      </a>
+    </div>
+    <!-- /.navbar-header -->
+    <!-- Left Menu & Sidebar Toggle -->
+    <!-- <ul class="nav navbar-nav">
+      <li class="sidebar-toggle dropdown"><a href="javascript:void(0)" class="ripple"><i class="material-icons list-icon md-24">menu</i></a>
+    </li>
+  </ul> -->
+  <!-- /.navbar-left -->
+  <!-- Search Form -->
+  <!-- <form class="navbar-search d-none d-sm-block" role="search"><i class="material-icons list-icon">search</i>
+    <input type="search" class="search-query" placeholder="Search anything..."> <a href="javascript:void(0);" class="remove-focus"><i class="material-icons md-24">close</i></a>
+  </form> -->
+  <!-- /.navbar-search -->
+  <div class="spacer"></div>
+  <!-- User Image with Dropdown -->
+  <ul class="nav navbar-nav">
+    <li class="dropdown"><a href="javascript:void(0);" class="dropdown-toggle dropdown-toggle-user ripple" data-toggle="dropdown"><span class="avatar thumb-xs2"><img [src]="usuario.img | imagen" alt="{{ usuario.nombre }}" class="rounded-circle"> <i class="material-icons list-icon">expand_more</i></span></a>
+    <div
+      class="dropdown-menu dropdown-left dropdown-card dropdown-card-profile animated flipInY">
+      <div class="card">
+        <header class="card-header d-flex mb-0"><a href="javascript:void(0);" class="col-md-4 text-center"><i class="material-icons md-24 align-middle">person_add</i> </a><a href="javascript:void(0);" class="col-md-4 text-center"><i class="material-icons md-24 align-middle">settings</i> </a>
+        <a
+          href="javascript:void(0);" class="col-md-4 text-center"><i class="material-icons md-24 align-middle">power_settings_new</i>
+        </a>
+      </header>
+      <ul class="list-unstyled card-body">
+        <li><a href="#"><span><span class="align-middle">Manage Accounts</span></span></a>
+      </li>
+      <li><a href="#"><span><span class="align-middle">Change Password</span></span></a>
+    </li>
+    <li><a href="#"><span><span class="align-middle">Check Inbox</span></span></a>
+  </li>
+  <li><a href="#" (click)="_usuarioService.logout()"><span><span class="align-middle">Cerrar Sesión</span></span></a>
+</li>
+</ul>
+<!-- /.card-body -->
+</div>
+<!-- /.card -->
+</div>
+<!-- /.dropdown-card-profile -->
+</li>
+<!-- /.dropdown -->
+</ul>
+<!-- /.navbar-nav -->
+</div>
+<!-- /.container-fluid -->
+</nav>

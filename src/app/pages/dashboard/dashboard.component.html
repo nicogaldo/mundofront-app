@@ -1,0 +1,171 @@
+<div class="container-fluid px-0">
+    <div class="widget-list">
+        <div class="row">
+            <div class="widget-holder col-md-12">
+                
+                <div class="row">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="bg-primary text-inverse">
+                            <div [routerLink]="['/consultas']" class="py-2 px-4 cursor-pointer">
+                                <div class="counter-w-info media">
+                                    <div class="media-body w-50">
+                                        <p class="mr-b-5 fw-600">Total Consultas</p>
+                                        <span class="counter-title d-block mx-auto">
+                                            <span countUp [endVal]="totalConsultas">0</span>
+                                        </span>
+                                    </div>
+                                    <!-- /.media-body -->
+                                    <div class="pull-right align-self-center">
+                                        <i class="fas fa-fw fa-headset fa-3x"></i>
+                                    </div>
+                                </div>
+                                <!-- /.counter-w-info -->
+                            </div>
+                            <!-- /.widget-body -->
+                        </div>
+                        <!-- /.widget-bg -->
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-6">
+                        <div class="bg-success text-inverse">
+                            <div [routerLink]="['/clientes']" class="py-2 px-4 cursor-pointer">
+                                <div class="counter-w-info media">
+                                    <div class="media-body w-50">
+                                        <p class="mr-b-5 fw-600">Total Clientes</p>
+                                        <span class="counter-title d-block mx-auto">
+                                            <span countUp [endVal]="totalClientes">0</span>
+                                        </span>
+                                    </div>
+                                    <!-- /.media-body -->
+                                    <div class="pull-right align-self-center">
+                                        <i class="fas fa-fw fa-users fa-3x"></i>
+                                    </div>
+                                </div>
+                                <!-- /.counter-w-info -->
+                            </div>
+                            <!-- /.widget-body -->
+                        </div>
+                        <!-- /.widget-bg -->
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-6">
+                        <div class="bg-info text-inverse">
+                            <div [routerLink]="['/turnos']" class="py-2 px-4 cursor-pointer">
+                                <div class="counter-w-info media">
+                                    <div class="media-body w-50">
+                                        <p class="mr-b-5 fw-600">Turnos Próximos</p>
+                                        <span class="counter-title d-block mx-auto">
+                                            <span countUp [endVal]="turnosProximos">0</span>
+                                        </span>
+                                    </div>
+                                    <!-- /.media-body -->
+                                    <div class="pull-right align-self-center">
+                                        <i class="far fa-fw fa-calendar-check fa-3x"></i>
+                                    </div>
+                                </div>
+                                <!-- /.counter-w-info -->
+                            </div>
+                            <!-- /.widget-body -->
+                        </div>
+                        <!-- /.widget-bg -->
+                    </div>
+                    
+                </div>
+                
+                
+                <div class="widget-heading widget-heading-border mx-0">
+                    
+                    <div class="dataTables_length mt-0" id="myTable_length">
+                        <label class="h6 text-themecolor m-0">Estadísticas de
+                            <select [ngModel]="selectMes" (change)="mesChange($event.target.value)" name="myTable_length">
+                                <option *ngFor="let m of meses; let i = index" value="{{i}}">{{m}}</option>
+                            </select>
+                            <select [ngModel]="selectAnio" (change)="anioChange($event.target.value)" name="myTable_length" class="float-right">
+                                <option *ngFor="let a of anios" value="{{a}}">{{a}}</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <!-- /.widget-heading -->
+                <div class="widget-body px-0">
+                    
+                    <div class="row">
+                        
+                        <div class="col-lg-6 mb-2">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Medios de contacto</h6>
+                                    <canvas baseChart
+                                    *ngIf="mediosChartData.length > 0"
+                                    [data]="mediosChartData"
+                                    [labels]="mediosChartLabels"
+                                    [chartType]="doughnutChartType"></canvas>
+                                    
+                                    <div *ngIf="cargandoDatos" class="text-center text-muted">
+                                        <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+                                    </div>
+                                    
+                                    <div *ngIf="mediosChartData.length == 0 && !cargandoDatos" class="text-muted text-center">
+                                        <i class="far fa-frown fa-4x d-block mx-auto" aria-hidden="true"></i>
+                                        No hay datos para mostrar
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6 mb-2">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">¿Cómo nos conoció?</h6>
+                                    <canvas baseChart
+                                    *ngIf="comoChartData.length > 0"
+                                    [data]="comoChartData"
+                                    [labels]="comoChartLabels"
+                                    [chartType]="doughnutChartType"></canvas>
+                                    
+                                    <div *ngIf="cargandoDatos" class="text-center text-muted">
+                                        <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+                                    </div>
+                                    
+                                    <div *ngIf="comoChartData.length == 0 && !cargandoDatos" class="text-muted text-center">
+                                        <i class="far fa-frown fa-4x d-block mx-auto" aria-hidden="true"></i>
+                                        No hay datos para mostrar
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6 mb-2">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Consultas <span class="badge badge-info">{{ consultasMes }}</span></h6>
+                                    <canvas baseChart
+                                    *ngIf="consultasChartData.length > 0"
+                                    [data]="consultasChartData"
+                                    [labels]="consultasChartLabels"
+                                    [chartType]="doughnutChartType"></canvas>
+                                    
+                                    <div *ngIf="cargandoDatos" class="text-center text-muted">
+                                        <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+                                    </div>
+                                    
+                                    <div *ngIf="consultasChartData.length == 0 && !cargandoDatos" class="text-muted text-center">
+                                        <i class="far fa-frown fa-4x d-block mx-auto" aria-hidden="true"></i>
+                                        No hay datos para mostrar
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                </div>
+                <!-- /.widget-body -->
+            </div>
+            <!-- /.widget-holder -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.widget-list -->
+</div>

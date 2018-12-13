@@ -1,0 +1,271 @@
+<div class="container-fluid px-0">
+	<div class="widget-list">
+		<div class="row">
+			<div class="widget-holder col-md-12">
+				<div class="widget-bg">
+					<div class="widget-heading widget-heading-border">
+						<h6 class="mb-0 mr-auto">Turnos Próximos ({{ totalRegistros }})</h6>
+						<button (click)="nuevoTurno()" class="btn btn-primary text-uppercase">Nuevo Turno</button>
+					</div>
+					<!-- /.widget-heading -->
+					<div class="widget-body pt-2">
+						
+						<div *ngIf="usuario.role == 'ADMIN_ROLE' || usuario.role == 'MANAGER_ROLE'" class="btn-group d-block" role="group">
+							<ng-container *ngFor="let l of places">
+								<button (click)="cargarTurnos(l._id);selectedItem = l._id" [ngClass]="{'active': selectedItem === l._id}" class="btn btn-outline-default mt-1" role="button"> {{ l.name }} </button>
+							</ng-container>
+						</div>
+						
+						<div *ngIf="calendarOptions">
+							
+							<ng-fullcalendar #ucCalendar [options]="calendarOptions" [(eventsModel)]="events" (eventClick)="verTurno($event.detail)" class="custom-fullcalendar">
+							</ng-fullcalendar>
+							
+						</div>
+						
+					</div>
+					<!-- /.widget-body -->
+				</div>
+				<!-- /.widget-bg -->
+			</div>
+			<!-- /.widget-holder -->
+		</div>
+		<!-- /.row -->
+	</div>
+	<!-- /.widget-list -->
+</div>
+
+<ngx-smart-modal #vTm (onAnyCloseEvent)="resetModal()" identifier="vTm" [closable]="false">
+	
+	<div *ngIf="vTm.hasData()" class="modal-header px-0 pt-0 pb-2 m-0">
+		<h6 class="modal-title">Viendo Consulta&nbsp;<span *ngIf="vTm.getData().status === 'CANCELADO'" class="small text-danger">(cancelado)</span> </h6>
+		<button (click)="vTm.close()" type="button" class="close" data-dismiss="modal" aria-label="Close" >
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	
+	<div *ngIf="vTm.hasData()" class="modal-body pb-0">
+		
+		<div class="ecommerce-invoice">
+			<div class="row">
+				
+				<div class="col-md-6">
+					<h6 class="mr-t-0">{{ vTm.getData().client_c.nombre }} {{ vTm.getData().client_c.apellido }}</h6>
+					<span *ngIf="vTm.getData().client_c.telefono"><i class="fas fa-fw fa-phone"></i>&nbsp;{{ vTm.getData().client_c.telefono }}<br></span>
+					<span *ngIf="vTm.getData().client_c.email"><i class="fas fa-fw fa-envelope"></i>&nbsp;{{ vTm.getData().client_c.email }}<br></span>
+					<span><i class="fas fa-fw fa-child"></i>&nbsp;{{ vTm.getData().homenajeado_c.nombre }} {{ vTm.getData().homenajeado_c.apellido }} ({{ vTm.getData().homenajeado_c.nacimiento | age }})<br></span>
+					<span><i class="fas fa-fw fa-birthday-cake"></i>&nbsp;{{ vTm.getData().homenajeado_c.nacimiento | amLocale:'es' | amFromUtc | amDateFormat:'D MMMM [de ] YYYY' }}<br></span>
+					<span *ngIf="vTm.getData().homenajeado_c.colegio"><i class="fas fa-fw fa-school"></i>&nbsp;{{ vTm.getData().homenajeado_c.colegio }}<br></span>
+				</div>
+				<div class="col-md-6 text-right">
+					<h6 class="mr-t-0">Antendió:</h6>
+					<span> {{ vTm.getData().usuario.nombre }}&nbsp;<i class="fas fa-fw fa-headset"></i></span>
+					<br><span> {{ vTm.getData().createrAt | amLocale:'es' | amFromUtc | amDateFormat:'DD/MM/YYYY HH:mm' }}&nbsp;<i class="far fa-fw fa-clock"></i></span>
+					<ng-container *ngIf="vTm.getData().medio_c">
+						<br><span> {{ vTm.getData().medio_c }}&nbsp;<i class="fas fa-fw fa-share-alt"></i></span>
+						<br><span> {{ vTm.getData().como_c }}&nbsp;<i class="fas fa-fw fa-search"></i></span>
+					</ng-container>
+				</div>
+			</div>
+			<!-- /.row -->
+			<hr class="border-dashed mb-0">
+			<div class="row">
+				<div *ngIf="vTm.getData().medio_c" class="col-md-12">
+					<h6>Consultó por:</h6>
+					<span><i class="fas fa-fw fa-map-marker-alt"></i>&nbsp;Lugar: <strong>{{ vTm.getData().place_c.name }}</strong></span>
+					<br><span><i class="fas fa-fw fa-info-circle"></i>&nbsp;Detalles: <strong>{{ vTm.getData().detalles_c }}</strong></span>
+				</div>
+				<div *ngIf="vTm.getData().date_t" class="col-md-12">
+					<h6>Reserva:</h6>
+					<span><i class="far fa-fw fa-calendar-check"></i>&nbsp;Fecha: <strong>{{ vTm.getData().date_t | amLocale:'es' | amFromUtc | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>
+					<br><span><i class="far fa-fw fa-clock"></i>&nbsp;Turno: <strong>{{ vTm.getData().turno_t.name }} {{ vTm.getData().turno_t.from }} - {{ vTm.getData().turno_t.to }}</strong></span>
+					<br><span><i class="fas fa-fw fa-check-double"></i>&nbsp;Combo: <strong>{{ vTm.getData().combo_t.name }}</strong></span>
+					<br><span><i class="fas fa-fw fa-info-circle"></i>&nbsp;Detalles: <strong>{{ vTm.getData().detalles_t }}</strong></span>
+				</div>
+				
+			</div>
+			
+			<hr class="">
+			<div class="row">
+				<div class="col-md-12">
+					<button *ngIf="vTm.getData().status === 'RESERVADO'" (click)="cancelarTurno(vTm.getData())" class="btn btn-danger d-flex mr-auto float-left"><i class="far fa-calendar-times"></i>&nbsp;Cancelar Turno</button>
+					<button *ngIf="vTm.getData().status === 'CANCELADO'" (click)="cancelarTurno(vTm.getData())" class="btn btn-success d-flex mr-auto float-left"><i class="far fa-calendar-check"></i>&nbsp;Habilitar Turno</button>
+					<button (click)="vTm.close()" class="btn btn-link d-flex float-right ml-2"><i class="fas fa-times"></i>&nbsp;Cerrar</button>
+					<button (click)="reprogramarTurno(vTm.getData())" class="btn btn-info d-flex float-right ml-2"><i class="fas fa-sync"></i>&nbsp;Reprogramar</button>
+				</div>
+				
+			</div>
+		</div>
+		
+	</div>
+</ngx-smart-modal>
+
+<ngx-smart-modal #turnoModal (onAnyCloseEvent)="forma.reset()" identifier="turnoModal" [closable]="false">
+	
+	<div class="modal-header px-0 pt-0 pb-2 m-0">
+		<h6 class="modal-title"> {{ titleModal }} </h6>
+		<button (click)="turnoModal.close()" type="button" class="close" data-dismiss="modal" aria-label="Close" >
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	
+	<div class="modal-body pb-0">
+		
+		<form novalidate [formGroup]="forma" (ngSubmit)="guardarTurno()" class="form-material">
+			
+			<div class="row">
+				
+				<div class="col-lg-6 d-none">
+					<div class="form-group">
+						<input formControlName="_id" id="_id" name="_id" class="form-control" type="text">
+						<label for="_id">_id</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('client_c').errors?.required && forma.get('client_c').touched }">
+						<ng-select [items]="clientes"
+							(change)="forma.get('homenajeado_c').reset()"
+							[selectOnTab]="true"
+							[loading]="cargandoC"
+							bindValue="_id"
+							bindLabel="nombre"
+							notFoundText="No se encontraron resultados"
+							formControlName="client_c"
+							class="p-0"
+							id="client_c">
+							
+							<ng-template ng-option-tmp ng-label-tmp let-item="item">
+								{{ item.nombre }} {{ item.apellido }}
+							</ng-template>
+						</ng-select>
+						<label for="client_c">Seleccionar Cliente <span class="text-danger">*</span></label>
+						
+						<div *ngIf="forma.get('client_c').errors?.required && forma.get('client_c').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
+					</div>
+					
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group form-select">
+						<ng-select [items]="homenajeados"
+							[selectOnTab]="true"
+							[loading]="cargandoH"
+							bindValue="_id"
+							bindLabel="nombre"
+							notFoundText="No se encontraron resultados"
+							formControlName="homenajeado_c"
+							class="p-0"
+							id="homenajeado_c">
+							
+							<ng-template ng-option-tmp ng-label-tmp let-item="item">
+								{{ item.nombre }} {{ item.apellido }}
+							</ng-template>
+						</ng-select>
+						<label for="homenajeado_c">Seleccionar Homenajeado <span class="text-danger">*</span></label>
+					</div>
+					
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<input formControlName="date_t" id="date_t" name="date_t" class="form-control" type="date">
+						<label for="date_t">Día</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('place_t').errors?.required && forma.get('place_t').touched }">
+						<ng-select [items]="places"
+							(change)="forma.get('turno_t').reset()"
+							[selectOnTab]="true"
+							[loading]="cargandoP"
+							bindValue="_id"
+							bindLabel="name"
+							notFoundText="No se encontraron resultados"
+							formControlName="place_t"
+							class="p-0"
+							id="place_t">
+						</ng-select>
+						<label for="place_t">Seleccionar Lugar <span class="text-danger">*</span></label>
+						
+						<div *ngIf="forma.get('place_t').errors?.required && forma.get('place_t').touched" class="small text-danger">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('turno_t').errors?.required && forma.get('turno_t').touched }">
+						<ng-select [items]="horarios"
+							[selectOnTab]="true"
+							[loading]="cargandoT"
+							bindValue="_id"
+							notFoundText="No se encontraron resultados"
+							formControlName="turno_t"
+							class="p-0"
+							id="turno_t">
+							
+							<ng-template ng-option-tmp ng-label-tmp let-item="item">
+								{{ item.name }}: {{ item.from }} - {{ item.to }}
+							</ng-template>
+							
+						</ng-select>
+						<label for="turno_t">Seleccionar Turno <span class="text-danger">*</span></label>
+						
+						<div *ngIf="forma.get('turno_t').errors?.required && forma.get('turno_t').touched" class="small text-danger">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('combo_t').errors?.required && forma.get('combo_t').touched }">
+						
+						<ng-select [items]="combos"
+							[selectOnTab]="true"
+							[loading]="cargandoC"
+							bindValue="_id"
+							bindLabel="name"
+							notFoundText="No se encontraron resultados"
+							formControlName="combo_t"
+							name="combo_t"
+							class="p-0">
+						</ng-select>
+						<label for="combo_t">Seleccionar Combo <span class="text-danger">*</span></label>
+						
+						<div *ngIf="forma.get('combo_t').errors?.required && forma.get('combo_t').touched" class="small text-danger">
+							Este campo es requerido
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<input formControlName="sena_t" id="sena_t" name="sena_t" class="form-control" type="number">
+						<label for="sena_t">Seña <span class="text-danger">*</span></label>
+					</div>
+				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group">
+						<textarea formControlName="detalles_t" id="detalles_t" name="detalles_t" rows="1" class="form-control"></textarea>
+						<label for="detalles_t">Detalles sobre el turno</label>
+					</div>
+				</div>
+				
+				<!-- submit -->
+				<div class="col-lg-12">
+					<div class="text-right">
+						<button *ngIf="isEdit" (click)="borrarTurno(forma.value._id)" type="button" class="btn btn-danger d-flex mr-auto float-left"><i class="far fa-trash-alt"></i>&nbsp;Eliminar Turno</button>
+						<button [disabled]="!forma.valid" class="btn btn-primary d-flex float-right ml-2" type="submit">Guardar</button>
+					</div>
+				</div>
+				
+			</div>
+		</form>
+		
+	</div>
+</ngx-smart-modal>

@@ -1,0 +1,46 @@
+<aside class="site-sidebar scrollbar-enabled" data-suppress-scroll-x="true">
+	<!-- User Details -->
+	<div class="side-user">
+		<figure class="side-user-bg">
+			<img [src]="usuario.img | imagen" alt="{{ usuario.nombre }}" class="d-none">
+		</figure>
+		<div class="col-sm-12 text-center p-0 clearfix">
+			<div class="d-inline-block pos-relative mr-b-10"><span class="avatar-text text-uppercase"> {{ usuario.nombre | slice:0:1 }} </span>
+			<figure class="avatar-img thumb-sm mr-b-0 d-none">
+				<img [src]="usuario.img | imagen" alt="{{ usuario.nombre }}" class="rounded-circle">
+			</figure>
+		</div>
+		<!-- /.d-inline-block -->
+		<div class="lh-14 mr-t-5 sidebar-collapse-hidden">
+			<h6 class="hide-menu side-user-heading">{{ usuario.nombre }}</h6><small class="hide-menu">{{ usuario.email }}</small>
+		</div>
+	</div>
+	<!-- /.col-sm-12 -->
+</div>
+<!-- /.side-user -->
+<!-- Sidebar Menu -->
+<nav class="sidebar-nav">
+	<ul class="nav in side-menu">
+		
+		<!-- [ngClass]="{'hide': usuario.role == 'USER_ROLE' && menu.titulo == 'Administracion' }" -->
+		<li *ngFor="let menu of _sidebar.menu" class="menu-item-has-children" routerLinkActive="active">
+			<a class="cursor-pointer">
+				<i class="list-icon material-icons">{{ menu.icono }}</i> <span class="hide-menu">{{ menu.titulo }}</span>
+			</a>
+			<ul class="list-unstyled sub-menu">
+				
+				<li *ngFor="let submenu of menu.submenu">
+					<a routerLinkActive="active" [routerLink]="[ submenu.url ]"> {{ submenu.titulo }} </a>
+				</li>
+				
+				<!-- <li><a href="index2.html">Analytical</a></li>
+				<li><a href="index3.html">Demographical</a></li>
+				<li><a href="index4.html">Modern</a></li> -->
+			</ul>
+		</li>
+		
+	</ul>
+	<!-- /.side-menu -->
+</nav>
+<!-- /.sidebar-nav -->
+</aside>
