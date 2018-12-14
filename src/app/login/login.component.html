@@ -13,7 +13,7 @@
                     <label class="text-muted" for="example-password">Contraseña</label>
                     <input ngModel name="password" class="form-control form-control-line" type="password" required placeholder="Tu contraseña">
                 </div>
-                <div class="form-group no-gutters mb-5 text-center">
+                <div class="form-group no-gutters mb-0 text-center">
                     <!-- <a href="page-forgot-pwd.html" id="to-recover" class="text-muted fw-700 text-uppercase heading-font-family fs-12">Forgot Password?</a> -->
                     <div class="checkbox checkbox-circle checkbox-primary">
                         <label class="checkbox-checked">
@@ -22,15 +22,15 @@
                     </div>
                     
                 </div>
-                <div class="form-group no-gutters mb-5 text-center">
-                    
-                    <div *ngIf="_usuarioService.error_msg" class="form-group">
-                        <p class="text-danger"> {{ _usuarioService.error_msg }} </p>
-                    </div>
+                <div *ngIf="_usuarioService.error_msg" class="form-group no-gutters my-1 text-center">
+                    <p class="text-danger"> {{ _usuarioService.error_msg }} </p>
                 </div>
                 <!-- /.form-group -->
-                <div class="form-group mr-b-20">
-                    <button class="btn btn-block btn-rounded btn-md btn-primary text-uppercase fw-600 ripple" type="submit">Iniciar Sesión</button>
+                <div class="form-group mt-4 mr-b-20">
+                    <button class="btn btn-block btn-rounded btn-md btn-primary text-uppercase fw-600 ripple" type="submit">
+                    <span *ngIf="!_usuarioService.cargando">Ingresar</span>
+                    <span *ngIf="_usuarioService.cargando">Ingresando <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> </span>
+                    </button>
                 </div>
             </form>
             <!-- /form -->

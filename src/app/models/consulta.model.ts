@@ -9,7 +9,8 @@ export class Consulta {
 		public detalles_c?:string,
 
 		public date_t?:string,
-		public sena_t?:string,
+		public sena_t?:number,
+		public sena_m?:string,
 		public place_t?:string,
 		public turno_t?:string,
 		public combo_t?:string,

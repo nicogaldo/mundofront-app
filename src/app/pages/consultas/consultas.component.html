@@ -30,8 +30,8 @@
 									<th scope="col">Nombre</th>
 									<th scope="col">Homenajeado</th>
 									<th scope="col">Lugar</th>
-									<th scope="col">¿Cómo nos conoció?</th>
-									<th scope="col">Medio de contacto</th>
+									<th scope="col" title="¿Cómo nos conoció?">¿Cómo ...</th>
+									<th scope="col" title="Medio de contacto">Medio</th>
 									<th scope="col">Reserva</th>
 									<th scope="col">Atendió</th>
 									<th class="text-right">Fecha</th>
@@ -253,10 +253,48 @@
 			</div>
 			<!-- end formGroupName consulta -->
 			
-			<div formGroupName="turno" class="row">
+			<!-- <div formGroupName="turno" class="row d-none"> -->
+			<div class="row d-none">
 				
 				<div class="col-sm-12">
 					<h5 class="col-form-label-lg border-top border-secondary"><i class="far fa-fw fa-calendar-alt"></i> Agendar turno</h5>
+				</div>
+				
+			</div>
+			<!-- end formGroupName turno -->
+			
+			<!-- submit -->
+			<div class="col-lg-12">
+				<div class="text-right">
+					<button [disabled]="!forma.valid" class="btn btn-primary ripple" type="submit">Guardar</button>
+				</div>
+			</div>
+		</form>
+		
+	</div>
+</ngx-smart-modal>
+
+<ngx-smart-modal #nuevoTurnoModal (onAnyCloseEvent)="formaTurno.reset()" identifier="nuevoTurnoModal" [closable]="false">
+	
+	<div class="modal-header px-0 pt-0 pb-2 m-0">
+		<h6 class="modal-title">Agendar Turno <span *ngIf="nuevoTurnoModal.hasData()">a {{ nuevoTurnoModal.getData().client_c.nombre }} {{ nuevoTurnoModal.getData().client_c.apellido }}</span></h6>
+		<button (click)="nuevoTurnoModal.close()" type="button" class="close" data-dismiss="modal" aria-label="Close" >
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	
+	<div class="modal-body pb-0">
+		
+		<form novalidate [formGroup]="formaTurno" (ngSubmit)="guardarTurno()" class="form-material">
+			
+			<!-- <div formGroupName="turno" class="row d-none"> -->
+			<div class="row">
+				
+				<div class="col-lg-6 d-none">
+					<div class="form-group">
+						<input formControlName="_id" id="_id" name="_id" class="form-control" type="text">
+						<label for="_id">_id</label>
+					</div>
 				</div>
 				
 				<div class="col-lg-6">
@@ -267,9 +305,9 @@
 				</div>
 				
 				<div class="col-lg-6">
-					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('turno.place_t').errors?.required && forma.get('turno.place_t').touched }">
+					<div class="form-group form-select" [ngClass]="{'has-danger': formaTurno.get('place_t').errors?.required && formaTurno.get('place_t').touched }">
 						<ng-select [items]="places"
-							(change)="forma.get('turno.turno_t').reset()"
+							(change)="formaTurno.get('turno_t').reset()"
 							[selectOnTab]="true"
 							[loading]="cargandoP"
 							bindValue="_id"
@@ -281,14 +319,14 @@
 						</ng-select>
 						<label for="place_t">Seleccionar Lugar</label>
 						
-						<div *ngIf="forma.get('turno.place_t').errors?.required && forma.get('turno.place_t').touched" class="small text-danger">
+						<div *ngIf="formaTurno.get('place_t').errors?.required && formaTurno.get('place_t').touched" class="small text-danger">
 							Este campo es requerido
 						</div>
 					</div>
 				</div>
 				
 				<div class="col-lg-6">
-					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('turno.turno_t').errors?.required && forma.get('turno.turno_t').touched }">
+					<div class="form-group form-select" [ngClass]="{'has-danger': formaTurno.get('turno_t').errors?.required && formaTurno.get('turno_t').touched }">
 						<ng-select [items]="turnos"
 							[selectOnTab]="true"
 							[loading]="cargandoT"
@@ -305,14 +343,14 @@
 						</ng-select>
 						<label for="turno_t">Seleccionar Turno</label>
 						
-						<div *ngIf="forma.get('turno.turno_t').errors?.required && forma.get('turno.turno_t').touched" class="small text-danger">
+						<div *ngIf="formaTurno.get('turno_t').errors?.required && formaTurno.get('turno_t').touched" class="small text-danger">
 							Este campo es requerido
 						</div>
 					</div>
 				</div>
 				
 				<div class="col-lg-6">
-					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('turno.combo_t').errors?.required && forma.get('turno.combo_t').touched }">
+					<div class="form-group form-select" [ngClass]="{'has-danger': formaTurno.get('combo_t').errors?.required && formaTurno.get('combo_t').touched }">
 						
 						<ng-select [items]="combos"
 							[selectOnTab]="true"
@@ -326,16 +364,44 @@
 						</ng-select>
 						<label for="combo_t">Seleccionar Combo</label>
 						
-						<div *ngIf="forma.get('turno.combo_t').errors?.required && forma.get('turno.combo_t').touched" class="small text-danger">
+						<div *ngIf="formaTurno.get('combo_t').errors?.required && formaTurno.get('combo_t').touched" class="small text-danger">
 							Este campo es requerido
 						</div>
 					</div>
 				</div>
 				
-				<div class="col-lg-6">
-					<div class="form-group">
+				<div class="col-md-6 col-lg-3">
+					<div class="form-group" [ngClass]="{'has-danger': formaTurno.get('sena_t').errors?.required && formaTurno.get('sena_t').touched }">
 						<input formControlName="sena_t" id="sena_t" name="sena_t" class="form-control" type="number">
 						<label for="sena_t">Seña</label>
+					</div>
+					
+					<div *ngIf="formaTurno.get('sena_t').errors?.required && formaTurno.get('sena_t').touched" class="small text-danger">
+						Este campo es requerido
+					</div>
+					
+				</div>
+				
+				<div class="col-md-6 col-lg-3">
+					<div class="form-group form-select" [ngClass]="{'has-danger': formaTurno.get('sena_m').errors?.required && formaTurno.get('sena_m').touched }">
+						<!-- <input formControlName="sena_m" id="sena_m" name="sena_m" class="form-control" type="number"> -->
+						<ng-select
+							[selectOnTab]="true"
+							notFoundText="No se encontraron resultados"
+							formControlName="sena_m"
+							name="sena_m"
+							class="p-0">
+							<ng-option value="Debito">Débito</ng-option>
+							<ng-option value="Efectivo">Efectivo</ng-option>
+							<ng-option value="Tarjeta">Tarjeta</ng-option>
+							<ng-option value="Transferencia">Transferencia</ng-option>
+						</ng-select>
+						<label for="sena_m">Seña Medio de pago</label>
+						
+					</div>
+					
+					<div *ngIf="formaTurno.get('sena_m').errors?.required && formaTurno.get('sena_m').touched" class="small text-danger">
+						Este campo es requerido
 					</div>
 				</div>
 				
@@ -352,7 +418,7 @@
 			<!-- submit -->
 			<div class="col-lg-12">
 				<div class="text-right">
-					<button [disabled]="!forma.valid" class="btn btn-primary ripple" type="submit">Guardar</button>
+					<button [disabled]="!formaTurno.valid" class="btn btn-primary ripple" type="submit"><i class="far fa-fw fa-calendar-check"></i>&nbsp;Reservar</button>
 				</div>
 			</div>
 		</form>
@@ -560,8 +626,9 @@
 				</div>
 				<div class="col-md-12">
 					<h6>Reserva:</h6>
-					<div *ngIf="!vcM.getData().date_t">
-						<i class="far fa-calendar-times text-danger"></i>&nbsp;Sin reserva&nbsp;&nbsp;|&nbsp;&nbsp;<i class="fas fa-plus text-success"></i>&nbsp;Agendar Turno
+					<div *ngIf="!vcM.getData().date_t" (click)="agendarTurno(vcM.getData())">
+						<i class="far fa-calendar-times text-danger"></i>&nbsp;Sin reserva&nbsp;&nbsp;|&nbsp;&nbsp;
+						<button class="btn btn-link p-0"><i class="fas fa-plus text-success"></i>&nbsp;Agendar Turno</button>
 					</div>
 					<div *ngIf="vcM.getData().date_t">
 						<span><i class="far fa-fw fa-calendar-check"></i>&nbsp;Fecha: <strong>{{ vcM.getData().date_t | amLocale:'es' | amFromUtc | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>

@@ -16,6 +16,7 @@ import * as moment from 'moment';
 export class ConsultasComponent implements OnInit {
 
   forma: FormGroup;
+  formaTurno: FormGroup;
   formaCliente: FormGroup;
   formaHomenajeado: FormGroup;
   //form_nuevo = false;
@@ -51,7 +52,7 @@ export class ConsultasComponent implements OnInit {
 		public ngxSmartModalService: NgxSmartModalService,
   ) {
 
-  	this.forma = new FormGroup({
+    this.forma = new FormGroup({
       'scliente': new FormControl(null),
       'shomenajeado': new FormControl({value: null, disabled: true}),
 
@@ -61,14 +62,34 @@ export class ConsultasComponent implements OnInit {
         'place_c': new FormControl(null, Validators.required),
         'detalles_c': new FormControl(null),
       }),
-      'turno': new FormGroup({
-        'date_t': new FormControl(null),
-        'place_t': new FormControl(null),
-        'turno_t': new FormControl(null),
-        'combo_t': new FormControl(null),
-        'sena_t': new FormControl(null),
-        'detalles_t': new FormControl(null),
-      })
+      //'turno': new FormGroup({
+      //  'date_t': new FormControl(null),
+      //  'place_t': new FormControl(null),
+      //  'turno_t': new FormControl(null),
+      //  'combo_t': new FormControl(null),
+      //  'sena_t': new FormControl(null),
+      //  'detalles_t': new FormControl(null),
+      //})
+    })
+
+  	this.formaTurno = new FormGroup({
+       '_id': new FormControl(null, Validators.required),
+      'date_t': new FormControl(null, Validators.required),
+      'place_t': new FormControl(null, Validators.required),
+      'turno_t': new FormControl(null, Validators.required),
+      'combo_t': new FormControl(null, Validators.required),
+      'sena_t': new FormControl(null, Validators.required),
+      'sena_m': new FormControl(null, Validators.required),
+      'detalles_t': new FormControl(null),
+    })
+
+    this.formaTurno.get('place_t').valueChanges.subscribe( (id: string) => {
+      if (!id) {
+        this.formaTurno.get('turno_t').disable();
+      } else {
+        this.formaTurno.get('turno_t').enable();
+        this.cargarTurnosDisponibles(id);        
+      }
     })
 
     this.formaCliente = new FormGroup({
@@ -98,39 +119,30 @@ export class ConsultasComponent implements OnInit {
       'colegio': new FormControl(null)
     })
 
-    this.forma.get('turno.place_t').valueChanges.subscribe( (id: string) => {
-
-      if (!id) {
-        this.forma.get('turno.turno_t').disable();
-      } else {
-        this.forma.get('turno.turno_t').enable();
-        this.cargarTurnosDisponibles(id);        
-      }
-    })
 
     /*=========================================
     =             Valid Date Turno            =
     =========================================*/
-    this.forma.get('turno.date_t').valueChanges.subscribe( (date: string) => {
-      if (date != null) {
-        this.forma.get('turno.sena_t').setValidators(Validators.required);
-        this.forma.get('turno.place_t').setValidators(Validators.required);
-        this.forma.get('turno.combo_t').setValidators(Validators.required);
-        this.forma.get('turno.turno_t').setValidators(Validators.required);
-      } else if (date === null) {
-        this.forma.get('turno.sena_t').clearValidators();
-        this.forma.get('turno.place_t').clearValidators();
-        this.forma.get('turno.combo_t').clearValidators();
-        this.forma.get('turno.turno_t').clearValidators();
-        this.forma.get('turno.sena_t').patchValue(null);
-        this.forma.get('turno.place_t').patchValue(null);
-        this.forma.get('turno.combo_t').patchValue(null);
-      }
-      this.forma.get('turno.sena_t').updateValueAndValidity();
-      this.forma.get('turno.place_t').updateValueAndValidity();
-      this.forma.get('turno.combo_t').updateValueAndValidity();
-      this.forma.get('turno.turno_t').updateValueAndValidity();
-    })
+    //this.forma.get('turno.date_t').valueChanges.subscribe( (date: string) => {
+    //  if (date != null) {
+    //    this.forma.get('turno.sena_t').setValidators(Validators.required);
+    //    this.forma.get('turno.place_t').setValidators(Validators.required);
+    //    this.forma.get('turno.combo_t').setValidators(Validators.required);
+    //    this.forma.get('turno.turno_t').setValidators(Validators.required);
+    //  } else if (date === null) {
+    //    this.forma.get('turno.sena_t').clearValidators();
+    //    this.forma.get('turno.place_t').clearValidators();
+    //    this.forma.get('turno.combo_t').clearValidators();
+    //    this.forma.get('turno.turno_t').clearValidators();
+    //    this.forma.get('turno.sena_t').patchValue(null);
+    //    this.forma.get('turno.place_t').patchValue(null);
+    //    this.forma.get('turno.combo_t').patchValue(null);
+    //  }
+    //  this.forma.get('turno.sena_t').updateValueAndValidity();
+    //  this.forma.get('turno.place_t').updateValueAndValidity();
+    //  this.forma.get('turno.combo_t').updateValueAndValidity();
+    //  this.forma.get('turno.turno_t').updateValueAndValidity();
+    //})
 
   }
 
@@ -336,9 +348,12 @@ export class ConsultasComponent implements OnInit {
   =            Nueva Consulta            =
   ======================================*/
   nuevaConsulta() {
-    this.cargarClientes();
-    this.cargarLugares();
-    this.cargarCombos();
+
+    if (!this.clientes.length) {
+      this.cargarClientes();
+      this.cargarLugares();
+      this.cargarCombos();
+    }
     this.ngxSmartModalService.getModal('nuevaConsultaModal').open();
   }
 
@@ -355,17 +370,17 @@ export class ConsultasComponent implements OnInit {
       medio_c: this.forma.value.consulta.medio_c,
       como_c: this.forma.value.consulta.como_c,
       detalles_c: this.forma.value.consulta.detalles_c,
-      date_t: this.forma.value.turno.date_t,
-      sena_t: this.forma.value.turno.sena_t,
-      place_t: this.forma.value.turno.place_t,
-      turno_t: this.forma.value.turno.turno_t,
-      combo_t: this.forma.value.turno.combo_t,
-      detalles_t: this.forma.value.turno.detalles_t,
+      //date_t: this.forma.value.turno.date_t,
+      //sena_t: this.forma.value.turno.sena_t,
+      //place_t: this.forma.value.turno.place_t,
+      //turno_t: this.forma.value.turno.turno_t,
+      //combo_t: this.forma.value.turno.combo_t,
+      //detalles_t: this.forma.value.turno.detalles_t,
     }
 
-    if (consulta.sena_t) {
-      consulta.status = 'RESERVADO';
-    }
+    //if (consulta.sena_t) {
+    //  consulta.status = 'RESERVADO';
+    //}
 
     this._consultaService.crearConsulta( consulta )
       .subscribe( (resp: any) => {
@@ -400,12 +415,66 @@ export class ConsultasComponent implements OnInit {
     return result;
   }
 
+  /*=====================================
+  =            Agendar Turno            =
+  =====================================*/
+  agendarTurno( data ) {
+
+    if (!this.places.length) {
+      this.cargarClientes();
+      this.cargarLugares();
+      this.cargarCombos();
+    }
+
+    this.ngxSmartModalService.getModal('vcM').close();
+    this.ngxSmartModalService.getModal('nuevoTurnoModal').open();
+    this.ngxSmartModalService.setModalData(data, 'nuevoTurnoModal');
+
+    this.formaTurno.get('_id').patchValue(data._id);
+  }
+
+  guardarTurno() {
+
+    if (!this.formaTurno.valid) {
+      return
+    }
+
+    let the_consulta = this.consultas.find(c => c._id === this.formaTurno.value._id);
+    the_consulta.date_t = this.formaTurno.value.date_t;
+    the_consulta.place_t = this.formaTurno.value.place_t;
+    the_consulta.turno_t = this.formaTurno.value.turno_t;
+    the_consulta.combo_t = this.formaTurno.value.combo_t;
+    the_consulta.sena_t = this.formaTurno.value.sena_t;
+    the_consulta.sena_m = this.formaTurno.value.sena_m;
+    the_consulta.detalles_t = this.formaTurno.value.detalles_t;    
+
+    if (the_consulta.sena_t) {
+      the_consulta.status = 'RESERVADO';
+    }
+
+    console.log(the_consulta);
+    this._consultaService.actualizarConsulta( the_consulta )
+      .subscribe( (resp: any) => {
+        swal({
+          type: 'success',
+          title: '¡Turno reservado!',
+          text: '',
+          showConfirmButton: false,
+          timer: 2000
+        });
+        this.ngxSmartModalService.getModal('nuevoTurnoModal').close();
+        this.cargarConsultas();
+      })
+  }
+  
+  
+
   /*====================================
   =            Ver Consulta            =
   ====================================*/
   verConsulta( id ) {
     let the_consulta = this.consultas.find(c => c._id === id);
-    console.log(the_consulta);
+    //console.log(the_consulta);
     this.ngxSmartModalService.getModal('vcM').open();
     this.ngxSmartModalService.setModalData( the_consulta, 'vcM' );
   }

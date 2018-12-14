@@ -90,7 +90,9 @@
 				<div class="col-md-12">
 					<button *ngIf="vTm.getData().status === 'RESERVADO'" (click)="cancelarTurno(vTm.getData())" class="btn btn-danger d-flex mr-auto float-left"><i class="far fa-calendar-times"></i>&nbsp;Cancelar Turno</button>
 					<button *ngIf="vTm.getData().status === 'CANCELADO'" (click)="cancelarTurno(vTm.getData())" class="btn btn-success d-flex mr-auto float-left"><i class="far fa-calendar-check"></i>&nbsp;Habilitar Turno</button>
+					
 					<button (click)="vTm.close()" class="btn btn-link d-flex float-right ml-2"><i class="fas fa-times"></i>&nbsp;Cerrar</button>
+					
 					<button (click)="reprogramarTurno(vTm.getData())" class="btn btn-info d-flex float-right ml-2"><i class="fas fa-sync"></i>&nbsp;Reprogramar</button>
 				</div>
 				

@@ -22,9 +22,9 @@ export class PlacesComponent implements OnInit {
   isEdit: boolean = false;
 
 	places: Place[] = [];
-  verDatos = '2 10 25 50 100'.split(' ');
+  verDatos = '10 25 50 100'.split(' ');
   desde: number = 0;
-  hasta: number = 2;
+  hasta: number = 10;
   pager: any = [];
   totalRegistros: number = 0;
   cargando: boolean = true;
