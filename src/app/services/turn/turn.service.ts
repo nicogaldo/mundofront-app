@@ -54,7 +54,7 @@ export class TurnService {
 
         swal({
           type: 'success',
-          title: '¡Turno creado!',
+          title: '¡Horario creado!',
           text: '',
           showConfirmButton: false,
           timer: 2000
@@ -71,13 +71,13 @@ export class TurnService {
 
     return this.http.put(url, turn).pipe(
       map((resp: any) => {
-        /*swal({
+        swal({
           type: 'success',
-          title: '¡Turno actualizado!',
+          title: '¡Horario actualizado!',
           text: '',
           showConfirmButton: false,
           timer: 2000
-        });*/
+        });
         return true;
       })
     )

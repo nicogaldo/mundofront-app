@@ -60,7 +60,7 @@ export class PlacesComponent implements OnInit {
 
   	this._placeService.cargarPlaces( this.desde, this.hasta )
   		.subscribe( (resp: any) => {
-  			this.places = resp.places;
+  			this.places = resp.places.filter(p => !p.deleted);
         this.totalRegistros = resp.total;
         this.cargando = false;
 
@@ -84,7 +84,7 @@ export class PlacesComponent implements OnInit {
     if (!termino) {
 	    this._placeService.cargarPlaces( this.desde, this.hasta )
 	  		.subscribe( (resp: any) => {
-	  			this.places = resp.places;
+	  			this.places = resp.places.filter(p => !p.deleted);
 	        this.cargando = false;
 	  		});
     }    
@@ -184,6 +184,40 @@ export class PlacesComponent implements OnInit {
   removeData() {
     this.formaEdit.reset();
     this.ngxSmartModalService.resetModalData('editarLugarModal');
+  }
+
+  borrarLugar( place: Place ) {
+
+    place.deleted = true;
+
+    swal({
+      title: '¿Estas seguro?',
+      text: 'Esta a punto de borrar un lugar',
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Si, Borrar',
+      cancelButtonText: 'Cancelar'
+    })
+      .then(borrar => {
+        if (borrar.value) {
+
+          this._placeService.actualizarPlace(place)
+            .subscribe(resp => {
+
+              this.ngxSmartModalService.getModal('editarLugarModal').close();
+              swal({
+                type: 'success',
+                title: 'Lugar borrado',
+                text: 'El lugar se ha eliminado correctamente',
+                showConfirmButton: false,
+                timer: 2000
+              });
+              this.cargarLugares();
+            });
+        }
+      });
   }
   
 }

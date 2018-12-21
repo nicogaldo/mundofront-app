@@ -41,9 +41,9 @@ export class ClientsComponent {
 
     this.forma = new FormGroup({
       'nombre': new FormControl(null, Validators.required),
-      'apellido': new FormControl(null),
+      'apellido': new FormControl(null, Validators.required),
       'telefono': new FormControl(null),
-      'email': new FormControl(null, Validators.pattern('[a-z0-9._%+-]+@[a-z0-9._]+\.[a-z]{2,3}$')),
+      'email': new FormControl(null, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')),      
       'detalles': new FormControl(null)
     })
   }

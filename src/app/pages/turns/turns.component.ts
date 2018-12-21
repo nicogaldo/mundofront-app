@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
 
-import { UsuarioService, ConsultaService, PlaceService, ClientService, ComboService, TurnService, PagerService } from '../../services/service.index';
-import { Usuario, Consulta, Place, Cliente, Homenajeado, Combo, Turn } from '../../models/index.model';
+import { UsuarioService, ConsultaService, PlaceService, ClientService, ComboService, TurnService, ExtraService, PagerService } from '../../services/service.index';
+import { Usuario, Consulta, Place, Cliente, Homenajeado, Combo, Turn, Extra } from '../../models/index.model';
 
 import { CalendarComponent } from 'ng-fullcalendar';
 import { Options } from 'fullcalendar';
@@ -20,8 +20,7 @@ export class TurnsComponent implements OnInit {
   usuario: Usuario;
 
   forma: FormGroup;
-  formaEdit: FormGroup;
-  formaTurnoEdit: FormGroup;
+  formaFinalizar: FormGroup;
   titleModal: string;
   isEdit: boolean = false;
 
@@ -35,11 +34,15 @@ export class TurnsComponent implements OnInit {
   cargandoH: boolean = false;
   combos: Combo[] = [];
   cargandoB: boolean = false;
+  extras: Extra[] = [];
+  cargandoE: boolean = false;
+  misExtras: any[] = [];
 
   horarios: Turn[] = [];
   cargandoT: boolean = false;
 
   selectedItem: string;
+  sumaTotal: number;
 
   verDatos = '2 10 25 50 100'.split(' ');
   desde: number = 0;
@@ -48,7 +51,7 @@ export class TurnsComponent implements OnInit {
   totalRegistros: number = 0;
 
   now = moment().format('YYYY-MM-DD');
-  events: any = [];
+  events: any[] = [];
   calendarOptions: Options;
   @ViewChild(CalendarComponent) ucCalendar: CalendarComponent;
 
@@ -59,6 +62,7 @@ export class TurnsComponent implements OnInit {
     public _clientService: ClientService,
     public _comboService: ComboService,
     public _turnService: TurnService,
+    public _extraService: ExtraService,
 		public _pagerService: PagerService,
 		public ngxSmartModalService: NgxSmartModalService,
   ) {
@@ -75,6 +79,35 @@ export class TurnsComponent implements OnInit {
       'detalles_t': new FormControl( null ),
     })
 
+    this.formaFinalizar = new FormGroup({
+      '_id': new FormControl( null ),
+      'extras': new FormControl( null ),
+      'efectivo': new FormControl( null ),
+      'tarjeta': new FormControl( null ),
+      'transferencia': new FormControl( null ),
+    })
+
+    this.formaFinalizar.get('extras').valueChanges.subscribe( (id: string) => {
+
+      if (id) {
+        //let the_extra:any = this.extras.find(e => id.includes(e._id));
+        //the_extra.total = the_extra.price;
+        //this.misExtras.push(the_extra);
+
+        this.misExtras = this.extras.filter(e => id.includes(e._id));
+        
+        let total = 0;
+        this.misExtras.forEach((p) => {
+          if (!p.total) {
+            p.total = p.price;
+          } else {
+            p.total = p.total;
+          }
+          p.cant = p.total / p.price;
+        })
+      }
+
+    })
 
     this.forma.get('place_t').valueChanges.subscribe( (id: string) => {
 
@@ -98,14 +131,15 @@ export class TurnsComponent implements OnInit {
       })
     }
 
+    
   }
 
   ngOnInit() {
     this.usuario = this._usuarioService.usuario;
 
-  	this.pager.currentPage = 1;
+    this.pager.currentPage = 1;
     this.cargarLugares();
-  	this.cargarTurnosProximos();
+    this.cargarTurnosProximos();
 
     // Calendar Options
     this.calendarOptions = {
@@ -115,6 +149,7 @@ export class TurnsComponent implements OnInit {
       timeFormat: 'H:mm',
       allDaySlot: false,
       slotLabelFormat: 'H:mm',
+      columnFormat: 'ddd D/M',
       nowIndicator: true,
       buttonText: {
         today: 'Hoy',
@@ -134,6 +169,32 @@ export class TurnsComponent implements OnInit {
       selectable: true,
       events: this.events
     };
+  }
+
+  changeTotal( p, value, consulta ) {
+    p.total = p.price * value;
+    p.cant =  parseInt(value);
+    this.calcularTotal(consulta);
+  }
+
+  calcularTotal( c ) {
+
+    let sena = c.sena_t;
+    let combo = c.combo_t.price;
+
+    console.log('this.misExtras');
+    console.log(this.misExtras);
+
+    //get total extras
+    let extrasTotal = this.misExtras.map(e => e.total);
+    console.log('extrasTotal');
+    console.log(extrasTotal);
+    extrasTotal = extrasTotal.reduce((a, b) => a + b);
+    console.log(extrasTotal);
+
+    this.sumaTotal = (extrasTotal + combo) - sena;
+    console.log(this.sumaTotal);
+
   }
 
   /*====================================
@@ -168,8 +229,14 @@ export class TurnsComponent implements OnInit {
     this.cargandoP = true;
     this._placeService.cargarPlaces( 0, 0)
       .subscribe( (resp: any) => {
-        this.places = resp.places;
+        this.places = resp.places.filter(p => !p.deleted);
         this.cargandoP = false;
+
+        if (this.places.length) {
+          this.selectedItem = this.places[0]._id;
+          this.cargarTurnos(this.selectedItem);
+        }
+
       });
   }
 
@@ -182,12 +249,22 @@ export class TurnsComponent implements OnInit {
       })
   }
 
-  cargarCombos() {
+  cargarCombosDisponibles(id) {
     this.cargandoB = true;
-    this._comboService.cargarCombos( 0 , 0)
+    this._comboService.cargarPlacesCombos(id)
       .subscribe( (resp: any) => {
         this.combos = resp.combos.filter(c => c.deleted != true);
         this.cargandoB = false;
+      });
+  }
+
+  cargarExtrasDisponibles(id) {
+    this.cargandoE = true;
+    this._extraService.cargarPlacesExtras(id)
+      .subscribe( (resp: any) => {
+        this.extras = resp.extras.filter(e => e.deleted != true);
+        //console.log(this.extras);
+        this.cargandoE = false;
       });
   }
 
@@ -213,15 +290,15 @@ export class TurnsComponent implements OnInit {
 
         this.turnos = resp.turnos;
         this.totalRegistros = this.turnos.filter(t => t.date_t > this.now).length;
-        this.cargando = false;
+
+        console.log(this.turnos);
 
         if (this.turnos.length > 0) {
           // preparar data eventos
           this.turnos.map((item: any) => {
 
             let paciente_nombre = item.homenajeado_c.nombre+' '+item.homenajeado_c.apellido;
-            let prepare_date = moment(item.date_t).utc().format('YYYY-MM-DD');
-            //console.log(prepare_date);
+            let prepare_date = moment(item.date_t).format('YYYY-MM-DD');
             let classname;
             let cancel = false;
 
@@ -229,23 +306,28 @@ export class TurnsComponent implements OnInit {
               cancel = true;
               classname = 'cancel';
               color = "#aaa";
+
+            } else if (item.status === 'FINALIZADO') {
+              color = '#8BC34A'
             }
 
             return {
-                'id': item._id,
-                'title': paciente_nombre,
-                'profesional': item.place_t.name,
-                'start': moment(prepare_date+ ' ' +item.turno_t.from),
-                'end': moment(prepare_date+ ' ' +item.turno_t.to),
-                'startEditable': false,
-                'durationEditable': false,
-                'color': color,
-                'className': classname,
-                'cancelado': cancel,
+              'id': item._id,
+              'title': paciente_nombre,
+              'start': moment(prepare_date+ ' ' +item.turno_t.from).toISOString(),
+              'end': moment(prepare_date+ ' ' +item.turno_t.to).toISOString(),
+              'startEditable': false,
+              'durationEditable': false,
+              'color': color,
+              'className': classname,
+              'cancelado': cancel,
             }
           }).forEach(item => this.events.push(item));
+
+          this.ucCalendar.fullCalendar( 'renderEvents', this.events, true);
         }
 
+        this.cargando = false;
   		});
   }
 
@@ -344,7 +426,7 @@ export class TurnsComponent implements OnInit {
       this.cargarClientes();
       this.cargarHomenajeados(the_turno.client_c._id);
       this.cargarTurnosDisponibles(the_turno.place_t._id);
-      this.cargarCombos();
+      this.cargarCombosDisponibles(the_turno.place_t._id);
     }
 
     this.isEdit = true;
@@ -365,13 +447,117 @@ export class TurnsComponent implements OnInit {
     })
   }
 
+  finalizarTurno( the_turno ) {
+
+    console.log(the_turno);
+
+    if (this.extras.length <= 0) {
+      this.cargarExtrasDisponibles(the_turno.place_t._id);
+    }
+
+    this.titleModal = 'Finalizar Turno';
+    this.ngxSmartModalService.getModal('fTm').open();
+    this.ngxSmartModalService.setModalData( the_turno, 'fTm' );
+
+    this.formaFinalizar.patchValue({
+      _id: the_turno._id,
+    })
+
+    this.sumaTotal = the_turno.combo_t.price - the_turno.sena_t;
+  }
+
+  resetFinalizar() {
+    this.formaFinalizar.reset();
+    this.ngxSmartModalService.resetModalData('fTm');    
+  }
+
+  guardarFinalizar() {
+
+    if (!this.formaFinalizar.valid) {
+      return
+    }
+
+    if (this.sumaTotal) {
+
+      let turno: any = this.turnos.find(t => t._id ===  this.formaFinalizar.value._id);
+
+      let medio = {
+        efectivo: this.formaFinalizar.value.efectivo,
+        tarjeta: this.formaFinalizar.value.tarjeta,
+        transferencia: this.formaFinalizar.value.transferencia,
+      }
+
+      console.log('medio');
+      console.log(medio);
+
+      let the_extras:any[] = [];
+
+      if (this.formaFinalizar.value.extras) {
+
+        console.log('this.misExtras');
+        console.log(this.misExtras);
+
+        this.misExtras.map((item: any) => {
+
+          return {
+            'extra': item._id,
+            'cantidad': item.cant,
+            'monto': item.total,
+          }
+        }).forEach(item => the_extras.push(item));
+
+        console.log('the_extras');
+        console.log(the_extras);
+
+      }
+
+      let pago: any = {
+        medio: JSON.stringify(medio),
+        monto_combo_cobrado: turno.combo_t.price,
+        descuento: 0,
+        sena: turno.sena_t,
+        date_pago: this.now,
+        extras: the_extras,
+        total: this.sumaTotal + turno.sena_t,
+      }
+
+      console.log('pago');
+      console.log(pago);
+
+      //turno.servicios_extra = this.formaFinalizar.value.extras;
+      //turno.monto_f = this.sumaTotal;
+      turno.pago = pago;
+      turno.status = 'FINALIZADO';
+
+      console.log('turno');
+      console.log(turno);
+      
+      this._consultaService.actualizarConsulta( turno )
+        .subscribe( resp => {
+          this.ngxSmartModalService.getModal('fTm').close();
+          this.ngxSmartModalService.getModal('vTm').close();
+          swal({
+            type: 'success',
+            title: '¡Listo!',
+            text: 'Turno Finalizado',
+            showConfirmButton: false,
+            timer: 2000
+          });
+          this.cargarTurnos(this.selectedItem);
+        });
+    }
+  }
+
+  /*===================================
+  =            Nuevo Turno            =
+  ===================================*/
   nuevoTurno() {
 
     if (this.clientes.length <= 0) {
       this.cargarClientes();
       //this.cargarHomenajeados(the_turno.client_c._id);
       //this.cargarTurnosDisponibles(the_turno.place_t._id);
-      this.cargarCombos();
+      //this.cargarCombosDisponibles(the_turno.place_t._id);
     }
 
     this.isEdit = false;

@@ -55,7 +55,7 @@
 												<span class="badge badge-secondary font-weight-normal p-2">Todos</span>
 											</ng-container>
 										</td>
-										<td class="text-right">{{ e.price }}</td>
+										<td class="text-right">$ {{ e.price }}</td>
 									</tr>
 								</ng-container>
 								
@@ -193,7 +193,7 @@
 					
 					<div class="form-group" [ngClass]="{'has-danger': formaEdit.get('name').errors?.required && formaEdit.get('name').touched }">
 						<input formControlName="name" class="form-control" type="text" id="name" placeholder="Nombre del lugar">
-						<label for="name">Nombre</label>
+						<label for="name">Nombre <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaEdit.get('name').errors?.required && formaEdit.get('name').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -225,7 +225,7 @@
 							<ng-option [value]="'all'">Todos</ng-option>
 							<ng-option *ngFor="let p of places" [value]="p._id" >{{p.name}}</ng-option>
 						</ng-select>
-						<label for="place">Lugar</label>
+						<label for="place">Lugar <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaEdit.get('place').errors?.required && formaEdit.get('place').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -237,7 +237,7 @@
 					
 					<div class="form-group" [ngClass]="{'has-danger': formaEdit.get('price').errors?.required && formaEdit.get('price').touched }">
 						<input formControlName="price" class="form-control" type="number" id="price">
-						<label for="price">Precio</label>
+						<label for="price">Precio <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaEdit.get('price').errors?.required && formaEdit.get('price').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido

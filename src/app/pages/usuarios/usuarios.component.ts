@@ -40,7 +40,7 @@ export class UsuariosComponent implements OnInit {
 
     this.forma = new FormGroup({
       'nombre': new FormControl( null, Validators.required ),
-      'email': new FormControl( null, [ Validators.required, Validators.pattern('[a-z0-9._%+-]+@[a-z0-9._]+\.[a-z]{2,3}$') ] ),
+      'email': new FormControl( null, [ Validators.required, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$') ] ),
       'password': new FormControl( '', [ Validators.required, Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}/) ] ),
       'role': new FormControl( 'USER_ROLE' )
     })
@@ -48,7 +48,7 @@ export class UsuariosComponent implements OnInit {
     this.formaEdit = new FormGroup({
       '_id': new FormControl( null, Validators.required ),
       'nombre': new FormControl( null, Validators.required ),
-      'email': new FormControl( null, [ Validators.required, Validators.pattern('[a-z0-9._%+-]+@[a-z0-9._]+\.[a-z]{2,3}$') ] ),
+      'email': new FormControl( null, [ Validators.required, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$') ] ),
       //'password': new FormControl( null ),
       'role': new FormControl( null ),
     })
@@ -64,10 +64,11 @@ export class UsuariosComponent implements OnInit {
   ======================================*/
   cargarUsuarios() {
 
-  	this._usuarioService.cargarUsuarios( this.desde, this.hasta )
+    //this._usuarioService.cargarUsuarios( this.desde, this.hasta )
+  	this._usuarioService.cargarMisUsuarios( this.desde, this.hasta )
   		.subscribe( (resp: any) => {
-  			this.usuarios = resp.usuarios;
-        this.totalRegistros = resp.total;
+  			this.usuarios = resp.usuarios.filter(u => u.user_parent === this.usuario._id || u._id === this.usuario._id);
+        this.totalRegistros = this.usuarios.length;
         this.cargando = false;
 
         this.setPage(1);
@@ -88,9 +89,9 @@ export class UsuariosComponent implements OnInit {
 
     // get current page of items
     if (!termino) {
-	    this._usuarioService.cargarUsuarios( this.desde, this.hasta )
+	    this._usuarioService.cargarMisUsuarios( this.desde, this.hasta )
 	  		.subscribe( (resp: any) => {
-	  			this.usuarios = resp.usuarios;
+	  			this.usuarios = resp.usuarios.filter(u => u.user_parent === this.usuario._id || u._id === this.usuario._id);
 	        this.cargando = false;
 	  		});
     }    

@@ -5,14 +5,14 @@
 				<div class="widget-bg">
 					<div class="widget-heading widget-heading-border">
 						<h6 class="mb-0 mr-auto">Turnos Próximos ({{ totalRegistros }})</h6>
-						<button (click)="nuevoTurno()" class="btn btn-primary text-uppercase">Nuevo Turno</button>
+						<!-- <button (click)="nuevoTurno()" class="btn btn-primary text-uppercase">Nuevo Turno</button> -->
 					</div>
 					<!-- /.widget-heading -->
 					<div class="widget-body pt-2">
 						
 						<div *ngIf="usuario.role == 'ADMIN_ROLE' || usuario.role == 'MANAGER_ROLE'" class="btn-group d-block" role="group">
 							<ng-container *ngFor="let l of places">
-								<button (click)="cargarTurnos(l._id);selectedItem = l._id" [ngClass]="{'active': selectedItem === l._id}" class="btn btn-outline-default mt-1" role="button"> {{ l.name }} </button>
+								<button [disabled]="cargando" (click)="cargarTurnos(l._id);selectedItem = l._id" [ngClass]="{'active': selectedItem === l._id}" class="btn btn-outline-default mt-1" role="button"> {{ l.name }} </button>
 							</ng-container>
 						</div>
 						
@@ -93,7 +93,13 @@
 					
 					<button (click)="vTm.close()" class="btn btn-link d-flex float-right ml-2"><i class="fas fa-times"></i>&nbsp;Cerrar</button>
 					
-					<button (click)="reprogramarTurno(vTm.getData())" class="btn btn-info d-flex float-right ml-2"><i class="fas fa-sync"></i>&nbsp;Reprogramar</button>
+					
+					<button *ngIf="vTm.getData().status != 'FINALIZADO'" (click)="finalizarTurno(vTm.getData())" type="button" class="btn btn-success d-flex float-right ml-2"><i class="fas fa-cash-register"></i>&nbsp;Finalizar</button>
+					
+					<button *ngIf="vTm.getData().status === 'FINALIZADO'" disabled type="button" class="btn btn-success d-flex float-right ml-2"><i class="fas fa-cash-register"></i>&nbsp;Finalizado</button>
+					
+					<button *ngIf="vTm.getData().status != 'FINALIZADO'" (click)="reprogramarTurno(vTm.getData())" type="button" class="btn btn-info d-flex float-right ml-2"><i class="fas fa-sync"></i>&nbsp;Reprogramar</button>
+					
 				</div>
 				
 			</div>
@@ -228,7 +234,7 @@
 						
 						<ng-select [items]="combos"
 							[selectOnTab]="true"
-							[loading]="cargandoC"
+							[loading]="cargandoB"
 							bindValue="_id"
 							bindLabel="name"
 							notFoundText="No se encontraron resultados"
@@ -268,6 +274,157 @@
 				
 			</div>
 		</form>
+		
+	</div>
+</ngx-smart-modal>
+
+<ngx-smart-modal #fTm (onAnyCloseEvent)="resetFinalizar()" identifier="fTm" [closable]="false">
+	
+	<div class="modal-header px-0 pt-0 pb-2 m-0">
+		<h6 class="modal-title"> {{ titleModal }} </h6>
+		<button (click)="fTm.close()" type="button" class="close" data-dismiss="modal" aria-label="Close" >
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	
+	<div class="modal-body pb-0">
+		
+		<div *ngIf="fTm.hasData()" class="ecommerce-innovice">
+			
+			<div class="row">
+				
+				<div class="col-md-6">
+					<h6 class="mr-t-0">{{ fTm.getData().client_c.nombre }} {{ fTm.getData().client_c.apellido }}</h6>
+					
+					<span><i class="far fa-fw fa-calendar-check"></i>&nbsp;Fecha: <strong>{{ fTm.getData().date_t | amLocale:'es' | amFromUtc | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>
+					<br><span><i class="far fa-fw fa-clock"></i>&nbsp;Turno: <strong>{{ fTm.getData().turno_t.name }} {{ fTm.getData().turno_t.from }} - {{ fTm.getData().turno_t.to }}</strong></span>
+					<br><span><i class="fas fa-fw fa-check-double"></i>&nbsp;Combo: <strong>{{ fTm.getData().combo_t.name }}</strong></span>
+					<br><span><i class="fas fa-fw fa-info-circle"></i>&nbsp;Detalles: <strong>{{ fTm.getData().detalles_t }}</strong></span>
+					
+					
+				</div>
+				<div class="col-md-6 text-right">
+					<h6 class="mr-t-0">Antendió:</h6>
+					<span> {{ fTm.getData().usuario.nombre }}&nbsp;<i class="fas fa-fw fa-headset"></i></span>
+					<br><span> {{ fTm.getData().createrAt | amLocale:'es' | amFromUtc | amDateFormat:'DD/MM/YYYY HH:mm' }}&nbsp;<i class="far fa-fw fa-clock"></i></span>
+					<ng-container *ngIf="fTm.getData().medio_c">
+						<br><span> {{ fTm.getData().medio_c }}&nbsp;<i class="fas fa-fw fa-share-alt"></i></span>
+						<br><span> {{ fTm.getData().como_c }}&nbsp;<i class="fas fa-fw fa-search"></i></span>
+					</ng-container>
+				</div>
+			</div>
+			<!-- /.row -->
+			<hr class="border-dashed">
+			
+			<form novalidate [formGroup]="formaFinalizar" (ngSubmit)="guardarFinalizar()" class="row form-material">
+				
+				<div class="col-lg-6 d-none">
+					<div class="form-group">
+						<input formControlName="_id" id="_id" name="_id" class="form-control" type="text">
+						<label for="_id">_id</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-12">
+					<div class="form-group form-select">
+						
+						<ng-select [items]="extras"
+							(change)="calcularTotal(fTm.getData())"
+							[selectOnTab]="true"
+							[multiple]="true"
+							[closeOnSelect]="false"
+							[loading]="cargandoE"
+							bindValue="_id"
+							bindLabel="name"
+							notFoundText="No se encontraron resultados"
+							formControlName="extras"
+							name="extra_t"
+							class="p-0">
+						</ng-select>
+						<label for="extra_t">Añadir Extra</label>
+					</div>
+					
+				</div>
+				
+				<div class="col-lg-4">
+					<div class="form-group">
+						<input formControlName="efectivo" type="number" name="efectivo" class="form-control">
+						<label for="efectivo">Efectivo</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-4">
+					<div class="form-group">
+						<input formControlName="tarjeta" type="number" name="tarjeta" class="form-control">
+						<label for="tarjeta">Tarjeta</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-4">
+					<div class="form-group">
+						<input formControlName="transferencia" type="number" name="transferencia" class="form-control">
+						<label for="transferencia">Transferencia</label>
+					</div>
+				</div>
+				
+				<div class="col-lg-12">
+					
+					<table class="table table-sm table-hover">
+						
+						<thead>
+							<tr>
+								<th>Producto</th>
+								<th>Descripción</th>
+								<th class="text-right" width="100px">Cantidad</th>
+								<th class="text-right">Subtotal</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Seña</td>
+								<td>{{ fTm.getData().sena_m }}</td>
+								<td class="text-right"> 1 </td>
+								<td class="text-right">$ ({{ fTm.getData().sena_t }})</td>
+							</tr>
+							<tr>
+								<td>{{ fTm.getData().combo_t.name }}</td>
+								<td>{{ fTm.getData().combo_t.desc }}</td>
+								<td class="text-right"> 1 </td>
+								<td class="text-right">$ {{ fTm.getData().combo_t.price }}</td>
+							</tr>
+							<ng-container *ngIf="formaFinalizar.value.extras">
+								<tr *ngFor="let p of misExtras; let i = index">
+									<td>{{ p.name }}</td>
+									<td>{{ p.desc }}</td>
+									<td class="text-right">
+										<input (change)="changeTotal(p, $event.target.value, fTm.getData())" type="number" id="p._id" value="1" maxlength="2" min="1" class="form-control text-right py-0">
+									</td>
+									<td class="text-right">$ {{ p.total }}</td>
+								</tr>
+							</ng-container>
+						</tbody>
+						<tfoot>
+						<tr>
+							<td></td>
+							<td></td>
+							<td class="text-right font-weight-bold">Total:</td>
+							<td class="text-right font-weight-bold">$ {{ sumaTotal }}</td>
+						</tr>
+						</tfoot>
+						
+					</table>
+					
+				</div>
+				
+				<!-- submit -->
+				<div class="col-lg-12">
+					<div class="text-right">
+						<button [disabled]="!formaFinalizar.valid" class="btn btn-primary d-flex float-right ml-2" type="submit">Finalizar</button>
+					</div>
+				</div>
+				
+			</form>
+		</div>
 		
 	</div>
 </ngx-smart-modal>

@@ -43,7 +43,7 @@ export class ClientComponent implements OnInit {
       'nombre': new FormControl(null, Validators.required),
       'apellido': new FormControl(null),
       'telefono': new FormControl(null),
-      'email': new FormControl(null, Validators.pattern('[a-z0-9._%+-]+@[a-z0-9._]+\.[a-z]{2,3}$')),
+      'email': new FormControl(null, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')),
       'detalles': new FormControl(null)
     })
 
@@ -237,7 +237,7 @@ export class ClientComponent implements OnInit {
             swal({
               type: 'success',
               title: '¡Listo',
-              text: 'Paciente Borrado',
+              text: 'Cliente Borrado',
               showConfirmButton: false,
               timer: 2000
             });

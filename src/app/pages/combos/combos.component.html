@@ -30,7 +30,7 @@
 									<th scope="col">Nombre</th>
 									<th scope="col">Descripcion</th>
 									<th scope="col">Lugar</th>
-									<th scope="col">Precio</th>
+									<th scope="col" class="text-right">Precio</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -47,8 +47,15 @@
 									<tr (click)="verCombo( c._id )" *ngFor="let c of combos" id="{{c._id}}" class="cursor-pointer">
 										<td>{{ c.name }}</td>
 										<td>{{ c.desc }}</td>
-										<td>{{ c.place.name }}</td>
-										<td>{{ c.price }}</td>
+										<td>
+											<ng-container *ngIf="c.place">
+												<span *ngFor="let p of c.place" class="badge badge-secondary font-weight-normal p-2 mr-1"> {{ p ? p.name : 'Todos' }} </span>
+											</ng-container>
+											<ng-container *ngIf="!c.place">
+												<span class="badge badge-secondary font-weight-normal p-2">Todos</span>
+											</ng-container>
+										</td>
+										<td class="text-right">$ {{ c.price }}</td>
 									</tr>
 								</ng-container>
 								
@@ -96,8 +103,8 @@
 				<div class="col-lg-6">
 					
 					<div class="form-group" [ngClass]="{'has-danger': forma.get('name').errors?.required && forma.get('name').touched }">
-						<input formControlName="name" class="form-control" type="text" id="name" placeholder="Nombre del lugar" required>
-						<label for="name">Nombre</label>
+						<input formControlName="name" class="form-control" type="text" id="name" placeholder="Nombre del lugar">
+						<label for="name">Nombre <span class="text-danger">*</span></label>
 						
 						<div *ngIf="forma.get('name').errors?.required && forma.get('name').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -107,7 +114,7 @@
 				
 				<div class="col-lg-6">
 					<div class="form-group">
-						<input formControlName="desc" class="form-control" type="text" id="desc" placeholder="Nombre del lugar" required>
+						<input formControlName="desc" class="form-control" type="text" id="desc" placeholder="Nombre del lugar">
 						<label for="desc">Descripción</label>
 						
 					</div>
@@ -119,15 +126,17 @@
 						
 						<ng-select [items]="places"
 							[selectOnTab]="true"
+							[multiple]="true"
+							[closeOnSelect]="false"
 							[loading]="cargandoL"
-							bindValue="_id"
-							bindLabel="name"
 							notFoundText="No se encontraron resultados"
 							formControlName="place"
 							class="p-0"
 							id="place">
+							<ng-option [value]="'all'">Todos</ng-option>
+							<ng-option *ngFor="let p of places" [value]="p._id" >{{p.name}}</ng-option>
 						</ng-select>
-						<label for="place">Lugar</label>
+						<label for="place">Lugar <span class="text-danger">*</span></label>
 						
 						<div *ngIf="forma.get('place').errors?.required && forma.get('place').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -139,7 +148,7 @@
 					
 					<div class="form-group" [ngClass]="{'has-danger': forma.get('price').errors?.required && forma.get('price').touched }">
 						<input formControlName="price" class="form-control" type="number" id="price">
-						<label for="price">Precio</label>
+						<label for="price">Precio <span class="text-danger">*</span></label>
 						
 						<div *ngIf="forma.get('price').errors?.required && forma.get('price').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -183,8 +192,8 @@
 				<div class="col-lg-6">
 					
 					<div class="form-group" [ngClass]="{'has-danger': formaEdit.get('name').errors?.required && formaEdit.get('name').touched }">
-						<input formControlName="name" class="form-control" type="text" id="name" placeholder="Nombre del lugar" required>
-						<label for="name">Nombre</label>
+						<input formControlName="name" class="form-control" type="text" id="name" placeholder="Nombre del lugar">
+						<label for="name">Nombre <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaEdit.get('name').errors?.required && formaEdit.get('name').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -194,7 +203,7 @@
 				
 				<div class="col-lg-6">
 					<div class="form-group">
-						<input formControlName="desc" class="form-control" type="text" id="desc" placeholder="Nombre del lugar" required>
+						<input formControlName="desc" class="form-control" type="text" id="desc" placeholder="Nombre del lugar">
 						<label for="desc">Descripción</label>
 						
 					</div>
@@ -206,15 +215,17 @@
 						
 						<ng-select [items]="places"
 							[selectOnTab]="true"
+							[multiple]="true"
+							[closeOnSelect]="false"
 							[loading]="cargandoL"
-							bindValue="_id"
-							bindLabel="name"
 							notFoundText="No se encontraron resultados"
 							formControlName="place"
 							class="p-0"
 							id="place">
+							<ng-option [value]="'all'">Todos</ng-option>
+							<ng-option *ngFor="let p of places" [value]="p._id" >{{p.name}}</ng-option>
 						</ng-select>
-						<label for="place">Lugar</label>
+						<label for="place">Lugar <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaEdit.get('place').errors?.required && formaEdit.get('place').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -226,7 +237,7 @@
 					
 					<div class="form-group" [ngClass]="{'has-danger': formaEdit.get('price').errors?.required && formaEdit.get('price').touched }">
 						<input formControlName="price" class="form-control" type="number" id="price">
-						<label for="price">Precio</label>
+						<label for="price">Precio <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaEdit.get('price').errors?.required && formaEdit.get('price').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido

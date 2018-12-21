@@ -67,7 +67,7 @@ export class HorariosComponent implements OnInit {
   cargarLugares() {
   	this._placeService.cargarPlaces( 0, 0 )
   		.subscribe( (resp: any) => {
-  			this.places = resp.places;
+  			this.places = resp.places.filter( p => !p.deleted);;
         this.cargandoL = false;
   		});
   }
@@ -79,7 +79,7 @@ export class HorariosComponent implements OnInit {
 
   	this._turnService.cargarTurns( this.desde, this.hasta )
   		.subscribe( (resp: any) => {
-  			this.turns = resp.turns.filter( t => t.deleted === false);
+  			this.turns = resp.turns.filter( t => !t.deleted);
         this.totalRegistros = resp.total;
         this.cargando = false;
 
@@ -103,7 +103,7 @@ export class HorariosComponent implements OnInit {
     if (!termino) {
 	    this._turnService.cargarTurns( this.desde, this.hasta )
 	  		.subscribe( (resp: any) => {
-	  			this.turns = resp.turns.filter( t => t.deleted === false);
+	  			this.turns = resp.turns.filter( t => !t.deleted);
 	        this.cargando = false;
 	  		});
     }    

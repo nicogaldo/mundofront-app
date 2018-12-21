@@ -62,7 +62,7 @@
 											</span>
 											
 											<span *ngIf="c.date_t">
-												<i class="far fa-calendar-check text-success"></i> {{ c.date_t | amLocale:'es' | amFromUtc | amDateFormat:'dddd D'}} <small>en <strong>{{ c.place_t.name }}</strong> turno <strong>{{ c.turno_t.name }}</strong></small>
+												<i class="far fa-calendar-check text-success"></i> {{ c.date_t | amLocale:'es' | amFromUtc |  amDateFormat:'DD/MM/YY' }} <small>en <strong>{{ c.place_t.name }}</strong> turno <strong>{{ c.turno_t.name }}</strong></small>
 											</span>
 										</td>
 										
@@ -374,11 +374,11 @@
 					<div class="form-group" [ngClass]="{'has-danger': formaTurno.get('sena_t').errors?.required && formaTurno.get('sena_t').touched }">
 						<input formControlName="sena_t" id="sena_t" name="sena_t" class="form-control" type="number">
 						<label for="sena_t">Seña</label>
+						<div *ngIf="formaTurno.get('sena_t').errors?.required && formaTurno.get('sena_t').touched" class="small text-danger">
+							Este campo es requerido
+						</div>
 					</div>
 					
-					<div *ngIf="formaTurno.get('sena_t').errors?.required && formaTurno.get('sena_t').touched" class="small text-danger">
-						Este campo es requerido
-					</div>
 					
 				</div>
 				
@@ -398,11 +398,11 @@
 						</ng-select>
 						<label for="sena_m">Seña Medio de pago</label>
 						
+						<div *ngIf="formaTurno.get('sena_m').errors?.required && formaTurno.get('sena_m').touched" class="small text-danger">
+							Este campo es requerido
+						</div>
 					</div>
 					
-					<div *ngIf="formaTurno.get('sena_m').errors?.required && formaTurno.get('sena_m').touched" class="small text-danger">
-						Este campo es requerido
-					</div>
 				</div>
 				
 				<div class="col-lg-6">

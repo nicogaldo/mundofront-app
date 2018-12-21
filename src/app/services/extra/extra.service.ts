@@ -41,6 +41,12 @@ export class ExtraService {
     return this.http.get(url);
   }
 
+  cargarPlacesExtras( id ) {
+    let url = URL_SERVICIOS + '/extra/place/' + id ;
+    url += '?token=' + this.token;
+    return this.http.get(url);
+  }
+
   crearExtra(extra: Extra) {
     let url = URL_SERVICIOS + '/extra?token=' + this.token;
     return this.http.post(url, extra).pipe(

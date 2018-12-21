@@ -18,6 +18,8 @@ export class Consulta {
 		public assistance_t?:string,
 		public status?:string,
 		public cancel_t?:boolean,
+		public monto_f?:number,
+		public servicios_extra?:string,
 
 		public deleted?:boolean,
 		public _id?:string

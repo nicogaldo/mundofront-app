@@ -256,7 +256,7 @@ export class ExtrasComponent implements OnInit {
 
     swal({
       title: '¿Estas seguro?',
-      text: 'Esta a punto de borrar un horario',
+      text: 'Esta a punto de borrar un extra',
       type: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -271,15 +271,14 @@ export class ExtrasComponent implements OnInit {
             .subscribe(resp => {
 
               this.ngxSmartModalService.getModal('editarExtraModal').close();
-              var lst = document.getElementById(horario._id);
-              lst.classList.add('bg-danger');
-              lst.classList.add('animated');
-              lst.classList.add('fadeOut');
-              setTimeout(function() {
-                lst.classList.add('hide');
-              }, 500);
+              swal({
+                type: 'success',
+                title: '¡Listo!',
+                text: 'Extra Borrado',
+                showConfirmButton: false,
+                timer: 2000
+              });
 
-              this.extras.splice(this.extras.indexOf(horario), 1);
               this.cargarExtras();
             });
         }

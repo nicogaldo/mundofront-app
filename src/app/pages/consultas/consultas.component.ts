@@ -88,7 +88,8 @@ export class ConsultasComponent implements OnInit {
         this.formaTurno.get('turno_t').disable();
       } else {
         this.formaTurno.get('turno_t').enable();
-        this.cargarTurnosDisponibles(id);        
+        this.cargarTurnosDisponibles(id);
+        this.cargarCombosDisponibles(id);
       }
     })
 
@@ -96,7 +97,7 @@ export class ConsultasComponent implements OnInit {
       'nombre': new FormControl(null, Validators.required),
       'apellido': new FormControl(null),
       'telefono': new FormControl(null),
-      'email': new FormControl(null, Validators.pattern('[a-z0-9._%+-]+@[a-z0-9._]+\.[a-z]{2,3}$')),
+      'email': new FormControl(null, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')),
       'detalles': new FormControl(null)
     })
 
@@ -209,9 +210,9 @@ export class ConsultasComponent implements OnInit {
       })
   }
 
-  cargarCombos() {
+  cargarCombosDisponibles( id ) {
     this.cargandoB = true;
-    this._comboService.cargarCombos( 0 , 0)
+    this._comboService.cargarPlacesCombos(id)
       .subscribe( (resp: any) => {
         this.combos = resp.combos.filter(c => c.deleted != true);
         this.cargandoB = false;
@@ -352,7 +353,7 @@ export class ConsultasComponent implements OnInit {
     if (!this.clientes.length) {
       this.cargarClientes();
       this.cargarLugares();
-      this.cargarCombos();
+      //this.cargarCombos();
     }
     this.ngxSmartModalService.getModal('nuevaConsultaModal').open();
   }
@@ -423,7 +424,7 @@ export class ConsultasComponent implements OnInit {
     if (!this.places.length) {
       this.cargarClientes();
       this.cargarLugares();
-      this.cargarCombos();
+      //this.cargarCombos();
     }
 
     this.ngxSmartModalService.getModal('vcM').close();
@@ -440,7 +441,7 @@ export class ConsultasComponent implements OnInit {
     }
 
     let the_consulta = this.consultas.find(c => c._id === this.formaTurno.value._id);
-    the_consulta.date_t = this.formaTurno.value.date_t;
+    the_consulta.date_t = moment(this.formaTurno.value.date_t).toISOString();
     the_consulta.place_t = this.formaTurno.value.place_t;
     the_consulta.turno_t = this.formaTurno.value.turno_t;
     the_consulta.combo_t = this.formaTurno.value.combo_t;

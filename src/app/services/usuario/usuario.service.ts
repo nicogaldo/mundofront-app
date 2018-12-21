@@ -192,8 +192,12 @@ export class UsuarioService {
     return this.http.get(url);
   }
 
-  cargarUsuarios( desde: number = 0 , hasta: number = 5 ) {
+  //cargarUsuarios( desde: number = 0 , hasta: number = 5 ) {
+  cargarMisUsuarios( desde: number = 0 , hasta: number = 5 ) {
     let url = URL_SERVICIOS + '/usuario?desde=' + desde + '&hasta=' + hasta;
+    url += '&token=' + this.token;
+
+    console.log(url);
 
     return this.http.get(url);
   }

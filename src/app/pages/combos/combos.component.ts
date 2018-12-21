@@ -54,6 +54,22 @@ export class CombosComponent implements OnInit {
       'desc': new FormControl( null ),
       'price': new FormControl( null, Validators.required ),
     })
+
+    this.forma.get('place').valueChanges.subscribe( (value: any[]) => {
+      console.log(value);
+      if (value && value.length > 1 && value.includes('all')) {
+        this.forma.get('place').setValue(['all']);
+        this.forma.get('place').updateValueAndValidity;
+      }
+    })
+
+    this.formaEdit.get('place').valueChanges.subscribe( (value: any[]) => {
+      console.log(value);
+      if (value && value.length > 1 && value.includes('all')) {
+        this.formaEdit.get('place').setValue(['all']);
+        this.formaEdit.get('place').updateValueAndValidity;
+      }
+    })
   }
 
   ngOnInit() {
@@ -68,7 +84,7 @@ export class CombosComponent implements OnInit {
 		this.cargandoL = true;
   	this._placeService.cargarPlaces( 0, 0 )
   		.subscribe( (resp: any) => {
-  			this.places = resp.places;
+  			this.places = resp.places.filter( p => !p.deleted);
         this.cargandoL = false;
   		});
   }
@@ -80,7 +96,8 @@ export class CombosComponent implements OnInit {
 
   	this._comboService.cargarCombos( this.desde, this.hasta )
   		.subscribe( (resp: any) => {
-  			this.combos = resp.combos.filter( t => t.deleted === false);
+  			this.combos = resp.combos.filter( t => !t.deleted);
+        console.log(this.combos);
         this.totalRegistros = resp.total;
         this.cargando = false;
 
@@ -104,7 +121,7 @@ export class CombosComponent implements OnInit {
     if (!termino) {
 	    this._comboService.cargarCombos( this.desde, this.hasta )
 	  		.subscribe( (resp: any) => {
-	  			this.combos = resp.combos.filter( t => t.deleted === false);
+	  			this.combos = resp.combos.filter( t => !t.deleted);
 	        this.cargando = false;
 	  		});
     }    
@@ -149,9 +166,12 @@ export class CombosComponent implements OnInit {
   		price:this.forma.value.price
   	}
     
+    if (combo.place.includes('all')) {
+      combo.place = null;
+    }
+
     this._comboService.crearCombo( combo )
       .subscribe( (resp: any) => {
-
         this.ngxSmartModalService.getModal('nuevoComboModal').close();
         this.cargarCombos();
 			})
@@ -167,10 +187,17 @@ export class CombosComponent implements OnInit {
     this.isEdit = false;
 
     let combo: any = this.combos.find( c => c._id === id);
+    let the_combo;
+    if (!combo.place) {
+      the_combo = ['all'];
+    } else {
+      the_combo = combo.place.map( p => p._id);
+    }
+
     this.formaEdit.patchValue({
       _id: combo._id,
   		name: combo.name,
-  		place: combo.place._id,
+  		place: the_combo,
   		desc: combo.desc,
   		price: combo.price
     });
@@ -206,7 +233,9 @@ export class CombosComponent implements OnInit {
 
   actualizarCombo( combo: Combo ) {
 
-    console.log(combo);
+    if (combo.place.includes('all')) {
+      combo.place = null;
+    }
 
     this._comboService.actualizarCombo( combo )
       .subscribe( (resp:any) => {
@@ -227,7 +256,7 @@ export class CombosComponent implements OnInit {
 
     swal({
       title: '¿Estas seguro?',
-      text: 'Esta a punto de borrar un horario',
+      text: 'Esta a punto de borrar un combo',
       type: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -242,15 +271,14 @@ export class CombosComponent implements OnInit {
             .subscribe(resp => {
 
               this.ngxSmartModalService.getModal('editarComboModal').close();
-              var lst = document.getElementById(horario._id);
-              lst.classList.add('bg-danger');
-              lst.classList.add('animated');
-              lst.classList.add('fadeOut');
-              setTimeout(function() {
-                lst.classList.add('hide');
-              }, 500);
-
-              this.combos.splice(this.combos.indexOf(horario), 1);
+              swal({
+                type: 'success',
+                title: '¡Listo!',
+                text: 'Combo Borrado',
+                showConfirmButton: false,
+                timer: 2000
+              });
+              
               this.cargarCombos();
             });
         }

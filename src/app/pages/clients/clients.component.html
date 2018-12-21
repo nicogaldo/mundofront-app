@@ -96,7 +96,7 @@
 					
 					<div class="form-group" [ngClass]="{'has-danger': forma.get('nombre').errors?.required && forma.get('nombre').touched }">
 						<input formControlName="nombre" class="form-control" type="text" id="nombre">
-						<label for="nombre">Nombre</label>
+						<label for="nombre">Nombre <span class="text-danger">*</span></label>
 						
 						<div *ngIf="forma.get('nombre').errors?.required && forma.get('nombre').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -105,16 +105,19 @@
 				</div>
 				
 				<div class="col-lg-6">
-					<div class="form-group">
+					<div class="form-group" [ngClass]="{'has-danger': forma.get('apellido').errors?.required && forma.get('apellido').touched }">
 						<input formControlName="apellido" class="form-control" type="text" id="apellido">
-						<label for="apellido">Apellido</label>
+						<label for="apellido">Apellido <span class="text-danger">*</span></label>
 						
+						<div *ngIf="forma.get('apellido').errors?.required && forma.get('apellido').touched" class="small pos-absolute form-control-feedback">
+							Este campo es requerido
+						</div>
 					</div>
 				</div>
 				
 				<div class="col-lg-6">
 					<div class="form-group" [ngClass]="{'has-danger': forma.get('email').errors?.pattern}">
-						<input formControlName="email" class="form-control" type="email" id="email">
+						<input formControlName="email" email class="form-control" type="email" id="email">
 						<label for="email">Email</label>
 						
 						<div *ngIf="forma.get('email').errors?.pattern && forma.get('email').touched" class="small form-control-feedback">
@@ -125,7 +128,7 @@
 				
 				<div class="col-lg-6">
 					<div class="form-group">
-						<input formControlName="telefono" class="form-control" type="text" id="telefono">
+						<input formControlName="telefono" class="form-control" type="tel" id="telefono">
 						<label for="telefono">Teléfono</label>
 					</div>
 				</div>

@@ -200,8 +200,8 @@
 						<label for="role">Rol</label>
 						<select formControlName="role" id="role" name="role" type="select" class="form-control">
 							<option selected value="USER_ROLE">Profesional</option>
-							<option value="MANAGER_ROLE">Gestor</option>
-							<option value="ADMIN_ROLE">Admin</option>
+							<option [disabled]="_usuarioService.usuario.role != 'ADMIN_ROLE'" value="MANAGER_ROLE">Gestor</option>
+							<!-- <option value="ADMIN_ROLE">Admin</option> -->
 						</select>
 					</div>
 				</div>
