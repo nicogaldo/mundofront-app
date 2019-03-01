@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
+import { NgbDatepickerI18n, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 
-import { UsuarioService, ConsultaService, PlaceService, ClientService, ComboService, TurnService, ExtraService, PagerService } from '../../services/service.index';
+import { UsuarioService, ConsultaService, PlaceService, ClientService, ComboService, TurnService, ExtraService, PagerService, I18n, CustomDatepickerI18n, MomentDateFormatter } from '../../services/service.index';
 import { Usuario, Consulta, Place, Cliente, Homenajeado, Combo, Turn, Extra } from '../../models/index.model';
 
 import { CalendarComponent } from 'ng-fullcalendar';
@@ -13,7 +14,12 @@ import * as moment from 'moment';
 
 @Component({
   selector: 'app-turns',
-  templateUrl: './turns.component.html'
+  templateUrl: './turns.component.html',
+  providers: [
+    I18n,
+    { provide: NgbDatepickerI18n, useClass: CustomDatepickerI18n },
+    { provide: NgbDateParserFormatter, useClass: MomentDateFormatter },
+  ]
 })
 export class TurnsComponent implements OnInit {
 
@@ -51,6 +57,10 @@ export class TurnsComponent implements OnInit {
   totalRegistros: number = 0;
 
   now = moment().format('YYYY-MM-DD');
+  today;
+  fromDate: any;
+  toDate: any;
+
   events: any[] = [];
   calendarOptions: Options;
   @ViewChild(CalendarComponent) ucCalendar: CalendarComponent;
@@ -69,7 +79,8 @@ export class TurnsComponent implements OnInit {
 
     this.forma = new FormGroup({
       '_id': new FormControl( null ),
-      'client_c': new FormControl( null, Validators.required ),
+      'client_c_id': new FormControl( null, Validators.required ),
+      'client_c': new FormControl( {value: null, disabled: true}, Validators.required ),
       'homenajeado_c': new FormControl( null, Validators.required ),
       'date_t': new FormControl( null, Validators.required ),
       'place_t': new FormControl( null, Validators.required ),
@@ -115,7 +126,7 @@ export class TurnsComponent implements OnInit {
         this.forma.get('turno_t').disable();
       } else {
         this.forma.get('turno_t').enable();
-        this.cargarTurnosDisponibles(id);        
+        this.cargarHorariosDisponibles(id);
       }
     })
 
@@ -131,7 +142,6 @@ export class TurnsComponent implements OnInit {
       })
     }
 
-    
   }
 
   ngOnInit() {
@@ -139,7 +149,14 @@ export class TurnsComponent implements OnInit {
 
     this.pager.currentPage = 1;
     this.cargarLugares();
-    this.cargarTurnosProximos();
+    //this.cargarTotalTurnosMes();
+
+    let n = moment(this.now).format('YYYY-MM-DD').split('-');
+    this.today = {
+      year: parseInt(n[0]),
+      month: parseInt(n[1]),
+      day: parseInt(n[2])
+    }
 
     // Calendar Options
     this.calendarOptions = {
@@ -164,11 +181,16 @@ export class TurnsComponent implements OnInit {
         right: 'month,agendaWeek,agendaDay,listMonth'
       },
       defaultView: 'agendaWeek',
-      minTime: moment.duration('07:00:00'),
-      maxTime: moment.duration('23:00:00'),
+      
+      minTime: moment.duration('09:00:00'),
+      maxTime: moment.duration('22:00:00'),
       selectable: true,
       events: this.events
     };
+
+    
+
+
   }
 
   changeTotal( p, value, consulta ) {
@@ -182,19 +204,20 @@ export class TurnsComponent implements OnInit {
     let sena = c.sena_t;
     let combo = c.combo_t.price;
 
-    console.log('this.misExtras');
-    console.log(this.misExtras);
+    //console.log('this.misExtras');
+    //console.log(this.misExtras);
 
     //get total extras
     let extrasTotal = this.misExtras.map(e => e.total);
-    console.log('extrasTotal');
-    console.log(extrasTotal);
-    extrasTotal = extrasTotal.reduce((a, b) => a + b);
-    console.log(extrasTotal);
+    //console.log('extrasTotal');
+    //console.log(extrasTotal);
+    if (extrasTotal) {
+      extrasTotal = extrasTotal.reduce((a, b) => a + b);
+    }
+    //console.log(extrasTotal);
 
     this.sumaTotal = (extrasTotal + combo) - sena;
-    console.log(this.sumaTotal);
-
+    //console.log(this.sumaTotal);
   }
 
   /*====================================
@@ -216,7 +239,7 @@ export class TurnsComponent implements OnInit {
         let h = resp.homenajeados.filter(h => h.deleted != true);
         if (h) {
           this.homenajeados = h;
-          console.log(this.homenajeados);
+          //console.log(this.homenajeados);
         } else {
           this.homenajeados = null;
         }
@@ -240,12 +263,40 @@ export class TurnsComponent implements OnInit {
       });
   }
 
-  cargarTurnosDisponibles( id ) {
+  the_horarios:any [] = [];
+  cargarHorariosDisponibles( place_id ) {
     this.cargandoT = true;
-    this._turnService.cargarPlacesTurns(id)
+    this._turnService.cargarPlacesTurns(place_id)
       .subscribe( (resp: any) => {
-        this.horarios = resp.turn;
-        this.cargandoT = false;
+        //this.turnos = resp.turn;
+
+        //check turno
+        this._consultaService.cargarTurnosFecha( this.forma.value.date_t, place_id )
+          .subscribe( (resp_c:any) => {
+
+            let turnos_ocupados = resp_c.consultas;
+            let horario;
+
+            if (resp.turn.length > 0) {
+
+              turnos_ocupados.map((item: any) => {
+                return { 'name': item.turno_t.name }
+
+              }).forEach(item => this.the_horarios.push(item));
+
+              resp.turn.map(item => {
+                let ans = this.the_horarios.some(function(arrVal) {
+                  return item.name === arrVal.name;
+
+                });
+
+                if (ans) { item.disabled = true; }
+              })
+
+              this.horarios = resp.turn;
+              this.cargandoT = false;
+            }
+          })
       })
   }
 
@@ -271,8 +322,8 @@ export class TurnsComponent implements OnInit {
   /*======================================
   =            Cargar Turnos            =
   ======================================*/
-  cargarTurnosProximos() {
-    this._consultaService.cargarTurnos( this.now )
+  cargarTotalTurnosMes() {
+    this._consultaService.cargarTurnosRango( this.fromDate, this.toDate )
       .subscribe( (resp: any) => {
         //this.turnos = resp.turnos;
         this.totalRegistros = resp.total;
@@ -282,16 +333,19 @@ export class TurnsComponent implements OnInit {
   cargarTurnos( id ) {
 
     this.events = [];
-    let color = "#745af2";
-
     this.cargando = true;
+    let color = "#745af2";
+    //let month = this.ucCalendar.fullCalendar();
+    //console.log('month');
+    //console.log(month);
+    
     this._consultaService.cargarTurnosLugar( id )
       .subscribe( (resp: any) => {
 
         this.turnos = resp.turnos;
         this.totalRegistros = this.turnos.filter(t => t.date_t > this.now).length;
 
-        console.log(this.turnos);
+        //console.log(this.turnos);
 
         if (this.turnos.length > 0) {
           // preparar data eventos
@@ -299,6 +353,8 @@ export class TurnsComponent implements OnInit {
 
             let paciente_nombre = item.homenajeado_c.nombre+' '+item.homenajeado_c.apellido;
             let prepare_date = moment(item.date_t).format('YYYY-MM-DD');
+            let prepare_to = moment.utc(prepare_date + ' ' + item.turno_t.to).toISOString();
+            let prepare_from = moment.utc(prepare_date + ' ' + item.turno_t.from).toISOString();
             let classname;
             let cancel = false;
 
@@ -314,8 +370,8 @@ export class TurnsComponent implements OnInit {
             return {
               'id': item._id,
               'title': paciente_nombre,
-              'start': moment(prepare_date+ ' ' +item.turno_t.from).toISOString(),
-              'end': moment(prepare_date+ ' ' +item.turno_t.to).toISOString(),
+              'start': prepare_from,
+              'end': prepare_to,
               'startEditable': false,
               'durationEditable': false,
               'color': color,
@@ -425,7 +481,7 @@ export class TurnsComponent implements OnInit {
     if (this.clientes.length <= 0) {
       this.cargarClientes();
       this.cargarHomenajeados(the_turno.client_c._id);
-      this.cargarTurnosDisponibles(the_turno.place_t._id);
+      this.cargarHorariosDisponibles(the_turno.place_t._id);
       this.cargarCombosDisponibles(the_turno.place_t._id);
     }
 
@@ -434,11 +490,19 @@ export class TurnsComponent implements OnInit {
     this.ngxSmartModalService.getModal('turnoModal').open();
     this.ngxSmartModalService.setModalData( the_turno, 'turnoModal' );
 
+    let f = moment(the_turno.date_t).format('YYYY-MM-DD').split('-');
+
     this.forma.patchValue({
       _id: the_turno._id,
+      client_c_id: the_turno.client_c._id,
       client_c: the_turno.client_c._id,
       homenajeado_c: the_turno.homenajeado_c._id,
-      date_t: moment(the_turno.date_t).utc().format('YYYY-MM-DD'),
+      //date_t: moment(the_turno.date_t).utc().format('YYYY-MM-DD'),
+      date_t: {
+        year: parseInt(f[0]),
+        month: parseInt(f[1]),
+        day: parseInt(f[2])
+      },
       place_t: the_turno.place_t._id,
       turno_t: the_turno.turno_t._id,
       combo_t: the_turno.combo_t._id,
@@ -556,7 +620,7 @@ export class TurnsComponent implements OnInit {
     if (this.clientes.length <= 0) {
       this.cargarClientes();
       //this.cargarHomenajeados(the_turno.client_c._id);
-      //this.cargarTurnosDisponibles(the_turno.place_t._id);
+      //this.cargarHorariosDisponibles(the_turno.place_t._id);
       //this.cargarCombosDisponibles(the_turno.place_t._id);
     }
 
@@ -567,14 +631,16 @@ export class TurnsComponent implements OnInit {
 
   guardarTurno() {
 
+    let date_format = moment(this.forma.value.date_t).subtract(1, 'months').toISOString();
     let the_turno: Consulta = {
-      client_c: this.forma.value.client_c,
+      client_c: this.forma.value.client_c_id,
+      //client_c: this.forma.value.client_c,
       homenajeado_c: this.forma.value.homenajeado_c,
       medio_c: null,
       como_c: null,
       place_c: null,
       detalles_c: null,
-      date_t: moment(this.forma.value.date_t).toISOString(),
+      date_t: date_format,
       place_t: this.forma.value.place_t,
       turno_t: this.forma.value.turno_t,
       combo_t: this.forma.value.combo_t,
@@ -600,9 +666,12 @@ export class TurnsComponent implements OnInit {
       this._consultaService.actualizarConsulta( the_turno )
         .subscribe( resp => {
 
-          this.cargarTurnos(this.forma.value.place_t);
-          this.ngxSmartModalService.getModal('vTm').close();
-          this.ngxSmartModalService.getModal('turnoModal').close();
+this.ngxSmartModalService.getModal('vTm').close();
+this.ngxSmartModalService.getModal('turnoModal').close();
+
+if (document.body.classList.contains('dialog-open')) {
+  document.body.classList.remove('dialog-open');
+}
 
           swal({
             type: 'success',
@@ -611,6 +680,7 @@ export class TurnsComponent implements OnInit {
             timer: 2000
           });
 
+          this.cargarTurnos(the_turno.place_t);
         });
       
     } else {

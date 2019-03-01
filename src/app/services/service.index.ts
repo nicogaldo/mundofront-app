@@ -9,6 +9,8 @@ export { ComboService } from './combo/combo.service';
 export { ExtraService } from './extra/extra.service';
 export { PlaceService } from './place/place.service';
 export { TurnService } from './turn/turn.service';
+export { MomentDateFormatter, I18n, CustomDatepickerI18n } from './shared/datepicker.service';
+
 
 //guards
 export { LoginGuard } from './guards/login.guard';

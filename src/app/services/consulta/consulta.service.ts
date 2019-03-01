@@ -120,11 +120,16 @@ export class ConsultaService {
     return this.http.get(url);
   }
 
-  cargarTurnos( desde = '2010-01-01' ) {
-    let url = URL_SERVICIOS + '/consulta/solo/turnos?desde=' + desde;
+  cargarTurnosRango( desde, hasta ) {
+    let url = URL_SERVICIOS + '/consulta/solo/turnos?desde=' + desde + '&hasta=' + hasta;
     url += '&token=' + this.token;
     return this.http.get(url);
   }
 
+  cargarTurnosFecha( fecha, salon = '' ) {
+    let url = URL_SERVICIOS + '/consulta/' + fecha.day + '/'+ fecha.month + '/' + fecha.year + '?place=' + salon;
+    url += '&token=' + this.token;
+    return this.http.get(url);
+  }
 
 }

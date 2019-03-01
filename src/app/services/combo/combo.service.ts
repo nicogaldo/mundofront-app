@@ -44,7 +44,6 @@ export class ComboService {
   cargarPlacesCombos( id ) {
     let url = URL_SERVICIOS + '/combo/places/' + id;
     url += '?token=' + this.token;
-    console.log(url);
     return this.http.get(url);
   }
 

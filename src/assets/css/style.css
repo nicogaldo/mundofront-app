@@ -32514,7 +32514,8 @@ body.rtl .dropdown-toggle-user::before {
 }
 
 .dropdown-menu {
-    width: 12.85714em;
+    width: auto;
+    min-width: 12.85714em;
 
     border: 1px solid #eef1f2;
     -webkit-box-shadow: none;

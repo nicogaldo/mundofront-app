@@ -10,6 +10,9 @@ import {
   SidebarService,
   PagerService,
   SubirArchivosService,
+  MomentDateFormatter,
+  I18n,
+  CustomDatepickerI18n,
 } from './service.index';
 
 @NgModule({
@@ -25,6 +28,9 @@ import {
     SidebarService,
     PagerService,
     SubirArchivosService,
+    MomentDateFormatter,
+    I18n,
+    CustomDatepickerI18n,
   ],
   declarations: []
 })

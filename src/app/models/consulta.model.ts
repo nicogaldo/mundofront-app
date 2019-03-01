@@ -3,6 +3,7 @@ export class Consulta {
 	constructor (
 		public homenajeado_c:string,
 		public client_c:string,
+		public date_c?:string,
 		public place_c?:string,
 		public medio_c?:string,
 		public como_c?:string,

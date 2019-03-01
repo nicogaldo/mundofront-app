@@ -73,6 +73,7 @@
 				<div *ngIf="vTm.getData().medio_c" class="col-md-12">
 					<h6>Consultó por:</h6>
 					<span><i class="fas fa-fw fa-map-marker-alt"></i>&nbsp;Lugar: <strong>{{ vTm.getData().place_c.name }}</strong></span>
+					<br *ngIf="vTm.getData().date_c"><span *ngIf="vTm.getData().date_c"><i class="far fa-fw fa-calendar-alt"></i>&nbsp;Día: <strong>{{ vTm.getData().date_c | amFromUtc | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>
 					<br><span><i class="fas fa-fw fa-info-circle"></i>&nbsp;Detalles: <strong>{{ vTm.getData().detalles_c }}</strong></span>
 				</div>
 				<div *ngIf="vTm.getData().date_t" class="col-md-12">
@@ -129,6 +130,11 @@
 						<label for="_id">_id</label>
 					</div>
 				</div>
+
+				<div class="col-lg-6 form-group d-none">
+          <label for="client_c_id">client_c_id</label>
+          <input formControlName="client_c_id" class="form-control" type="text" name="paciente">
+        </div>
 				
 				<div class="col-lg-6">
 					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('client_c').errors?.required && forma.get('client_c').touched }">
@@ -178,8 +184,15 @@
 				</div>
 				
 				<div class="col-lg-6">
-					<div class="form-group">
-						<input formControlName="date_t" id="date_t" name="date_t" class="form-control" type="date">
+					<div class="form-group form-select">
+						<!-- <input formControlName="date_t" id="date_t" name="date_t" class="form-control" type="date"> -->
+						<div class="input-group">
+							<input (change)="forma.get('place_t').reset()" class="form-control" placeholder="DD/MM/YYYY"
+							name="dp" formControlName="date_t" ngbDatepicker #d="ngbDatepicker" [minDate]="today" [markDisabled]="isDisabled">
+							<div class="input-group-append">
+								<button class="btn btn-outline-inverse border-bottom text-gray" (click)="d.toggle();forma.get('place_t').reset()" type="button"> <i class="fa fa-calendar"></i> </button>
+							</div>
+						</div>
 						<label for="date_t">Día</label>
 					</div>
 				</div>

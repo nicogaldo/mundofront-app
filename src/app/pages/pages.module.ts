@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PAGES_ROUTES } from './pages.routes';
 import { SharedModule } from '../shared/shared.module';
 import { PipesModule } from '../pipes/pipes.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 // pages
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -18,9 +19,10 @@ import { TurnsComponent } from './turns/turns.component';
 import { HorariosComponent } from './horarios/horarios.component';
 import { ClientComponent } from './client/client.component';
 import { EstadisticasComponent } from './estadisticas/estadisticas.component';
+import { ExtrasComponent } from './extras/extras.component';
 
 // plugins
-import { MomentModule } from 'angular2-moment';
+import { MomentModule } from 'ngx-moment';
 import { FullCalendarModule } from 'ng-fullcalendar';
 import { NgxSmartModalModule } from 'ngx-smart-modal';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -30,7 +32,6 @@ import { ChartsModule } from 'ng2-charts/ng2-charts';
 import { DataTablesModule } from 'angular-datatables';
 
 import localeEs from '@angular/common/locales/es';
-import { ExtrasComponent } from './extras/extras.component';
 registerLocaleData(localeEs);
 
 @NgModule({
@@ -66,6 +67,7 @@ registerLocaleData(localeEs);
 			CountUpModule,
 			ChartsModule,
 			DataTablesModule,
+			NgbModule,
 		]
     
 })

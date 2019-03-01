@@ -19,7 +19,6 @@ import { APP_ROUTES } from './app.routes';
 import { ServiceModule } from './services/service.module';
 import { SharedModule } from './shared/shared.module';
 
-
 @NgModule({
   declarations: [
     AppComponent,

@@ -243,6 +243,20 @@
 					</div>
 				</div>
 				
+				<div class="col-lg-6">					
+					<div class="form-group form-select">
+						<!-- <input formControlName="consulta.date_c" id="consulta.date_c" name="consulta.date_c" class="form-control" type="date"> -->
+						<div class="input-group">
+							<input class="form-control" placeholder="DD/MM/YYYY"
+							name="dp" formControlName="date_c" ngbDatepicker #d_c="ngbDatepicker" [minDate]="today" [markDisabled]="isDisabled">
+							<div class="input-group-append">
+								<button class="btn btn-outline-inverse border-bottom text-gray" (click)="d_c.toggle()" type="button"> <i class="fa fa-calendar"></i> </button>
+							</div>
+						</div>
+						<label for="date_c">Consulta por día</label>
+					</div>
+				</div>
+
 				<div class="col-lg-6">
 					<div class="form-group">
 						<textarea formControlName="detalles_c" name="detalles_c" class="form-control" rows="1"></textarea>
@@ -298,9 +312,16 @@
 				</div>
 				
 				<div class="col-lg-6">
-					<div class="form-group">
-						<input formControlName="date_t" id="date_t" name="date_t" class="form-control" type="date">
-						<label for="date_t">Día</label>
+					<div class="form-group form-select">
+						<!-- <input formControlName="date_t" id="date_t" name="date_t" class="form-control" type="date"> -->
+						<div class="input-group">
+							<input (change)="formaTurno.get('place_t').reset()" class="form-control" placeholder="DD/MM/YYYY"
+							name="dp" formControlName="date_t" ngbDatepicker #d="ngbDatepicker" [minDate]="today" [markDisabled]="isDisabled">
+							<div class="input-group-append">
+								<button class="btn btn-outline-inverse border-bottom text-gray" (click)="d.toggle()" type="button"> <i class="fa fa-calendar"></i> </button>
+							</div>
+						</div>
+						<label for="date_t">Día <span class="text-danger">*</span></label>
 					</div>
 				</div>
 				
@@ -317,7 +338,7 @@
 							class="p-0"
 							id="place_t">
 						</ng-select>
-						<label for="place_t">Seleccionar Lugar</label>
+						<label for="place_t">Seleccionar Lugar <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaTurno.get('place_t').errors?.required && formaTurno.get('place_t').touched" class="small text-danger">
 							Este campo es requerido
@@ -328,7 +349,6 @@
 				<div class="col-lg-6">
 					<div class="form-group form-select" [ngClass]="{'has-danger': formaTurno.get('turno_t').errors?.required && formaTurno.get('turno_t').touched }">
 						<ng-select [items]="turnos"
-							[selectOnTab]="true"
 							[loading]="cargandoT"
 							bindValue="_id"
 							notFoundText="No se encontraron resultados"
@@ -341,7 +361,7 @@
 							</ng-template>
 							
 						</ng-select>
-						<label for="turno_t">Seleccionar Turno</label>
+						<label for="turno_t">Seleccionar Turno <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaTurno.get('turno_t').errors?.required && formaTurno.get('turno_t').touched" class="small text-danger">
 							Este campo es requerido
@@ -362,7 +382,7 @@
 							name="combo_t"
 							class="p-0">
 						</ng-select>
-						<label for="combo_t">Seleccionar Combo</label>
+						<label for="combo_t">Seleccionar Combo <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaTurno.get('combo_t').errors?.required && formaTurno.get('combo_t').touched" class="small text-danger">
 							Este campo es requerido
@@ -373,7 +393,7 @@
 				<div class="col-md-6 col-lg-3">
 					<div class="form-group" [ngClass]="{'has-danger': formaTurno.get('sena_t').errors?.required && formaTurno.get('sena_t').touched }">
 						<input formControlName="sena_t" id="sena_t" name="sena_t" class="form-control" type="number">
-						<label for="sena_t">Seña</label>
+						<label for="sena_t">Seña <span class="text-danger">*</span></label>
 						<div *ngIf="formaTurno.get('sena_t').errors?.required && formaTurno.get('sena_t').touched" class="small text-danger">
 							Este campo es requerido
 						</div>
@@ -396,7 +416,7 @@
 							<ng-option value="Tarjeta">Tarjeta</ng-option>
 							<ng-option value="Transferencia">Transferencia</ng-option>
 						</ng-select>
-						<label for="sena_m">Seña Medio de pago</label>
+						<label for="sena_m">Seña Medio de pago <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaTurno.get('sena_m').errors?.required && formaTurno.get('sena_m').touched" class="small text-danger">
 							Este campo es requerido
@@ -445,7 +465,7 @@
 					
 					<div class="form-group" [ngClass]="{'has-danger': formaCliente.get('nombre').errors?.required && formaCliente.get('nombre').touched }">
 						<input formControlName="nombre" class="form-control" type="text" id="nombre">
-						<label for="nombre">Nombre</label>
+						<label for="nombre">Nombre <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaCliente.get('nombre').errors?.required && formaCliente.get('nombre').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -516,7 +536,7 @@
 					
 					<div class="form-group" [ngClass]="{'has-danger': formaHomenajeado.get('parent').errors?.required && formaHomenajeado.get('parent').touched }">
 						<input formControlName="parent" class="form-control" type="text" id="parent">
-						<label for="parent">Mamá - Papá</label>
+						<label for="parent">Mamá - Papá <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaHomenajeado.get('parent').errors?.required && formaHomenajeado.get('parent').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -528,7 +548,7 @@
 					
 					<div class="form-group" [ngClass]="{'has-danger': formaHomenajeado.get('nombre').errors?.required && formaHomenajeado.get('nombre').touched }">
 						<input formControlName="nombre" class="form-control" type="text" id="nombre">
-						<label for="nombre">Nombre</label>
+						<label for="nombre">Nombre <span class="text-danger">*</span></label>
 						
 						<div *ngIf="formaHomenajeado.get('nombre').errors?.required && formaHomenajeado.get('nombre').touched" class="small pos-absolute form-control-feedback">
 							Este campo es requerido
@@ -622,13 +642,14 @@
 				<div class="col-md-12">
 					<h6>Consultó por:</h6>
 					<span><i class="fas fa-fw fa-map-marker-alt"></i>&nbsp;Lugar: <strong>{{ vcM.getData().place_c.name }}</strong></span>
+					<br *ngIf="vcM.getData().date_c"><span *ngIf="vcM.getData().date_c"><i class="far fa-fw fa-calendar-alt"></i>&nbsp;Día: <strong>{{ vcM.getData().date_c | amFromUtc | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>
 					<br><span><i class="fas fa-fw fa-info-circle"></i>&nbsp;Detalles: <strong>{{ vcM.getData().detalles_c }}</strong></span>
 				</div>
 				<div class="col-md-12">
 					<h6>Reserva:</h6>
-					<div *ngIf="!vcM.getData().date_t" (click)="agendarTurno(vcM.getData())">
+					<div *ngIf="!vcM.getData().date_t">
 						<i class="far fa-calendar-times text-danger"></i>&nbsp;Sin reserva&nbsp;&nbsp;|&nbsp;&nbsp;
-						<button class="btn btn-link p-0"><i class="fas fa-plus text-success"></i>&nbsp;Agendar Turno</button>
+						<button (click)="agendarTurno(vcM.getData())" class="btn btn-link p-0"><i class="fas fa-plus text-success"></i>&nbsp;Agendar Turno</button>
 					</div>
 					<div *ngIf="vcM.getData().date_t">
 						<span><i class="far fa-fw fa-calendar-check"></i>&nbsp;Fecha: <strong>{{ vcM.getData().date_t | amLocale:'es' | amFromUtc | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>

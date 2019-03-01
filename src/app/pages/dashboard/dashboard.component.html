@@ -1,7 +1,59 @@
 <div class="container-fluid px-0">
     <div class="widget-list">
         <div class="row">
+
+            <div class="col-lg-12 mb-2">
+                <div class="card">
+                    <h5 class="px-2">Turnos de hoy, {{ hoy | amDateFormat:'LL' }}</h5>
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Homenajeado</th>
+                                <th>Salón</th>
+                                <th>Horario</th>
+                                <th>Combo</th>
+                                <th>Teléfono</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr *ngIf="cargandoH" role="row" class="text-center">
+                                <td colspan="6"><i class="fas fa-circle-notch fa-spin fa-2x"></i></td>
+                            </tr>
+                            
+                            <tr *ngIf="turnosHoy.length === 0 && !cargandoH" role="row" class="text-center">
+                                <td colspan="6"><i class="far fa-meh fa-2x"></i> No se encontraron resultados</td>
+                            </tr>
+
+                            <tr *ngFor="let t of turnosHoy">
+                                <td> {{ t.client_c.nombre }} {{ t.client_c.apellido }}</td>
+                                <td> {{ t.homenajeado_c.nombre }} {{ t.homenajeado_c.apellido }} ({{ t.homenajeado_c.nacimiento | age }})</td>
+                                <td> {{ t.place_t.name }} </td>
+                                <td> {{ t.turno_t.name }} </td>
+                                <td> {{ t.combo_t.name }} </td>
+                                <td> {{ t.client_c.telefono }} </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="widget-holder col-md-12">
+                
+                <div class="mb-3 mx-0">
+                    
+                    <div class="dataTables_length mt-0" id="myTable_length">
+                        <label class="h6 text-themecolor m-0">Estadísticas de
+                            <select [ngModel]="selectMes" (change)="mesChange($event.target.value)" name="myTable_length">
+                                <option *ngFor="let m of meses; let i = index" value="{{i}}">{{m}}</option>
+                            </select>
+                            <select [ngModel]="selectAnio" (change)="anioChange($event.target.value)" name="myTable_length" class="float-right">
+                                <option *ngFor="let a of anios" value="{{a}}">{{a}}</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
                 
                 <div class="row">
                     <div class="col-lg-4 col-md-6">
@@ -9,9 +61,9 @@
                             <div [routerLink]="['/consultas']" class="py-2 px-4 cursor-pointer">
                                 <div class="counter-w-info media">
                                     <div class="media-body w-50">
-                                        <p class="mr-b-5 fw-600">Total Consultas</p>
+                                        <p class="mr-b-5 fw-600">Nuevos Contactos</p>
                                         <span class="counter-title d-block mx-auto">
-                                            <span countUp [endVal]="totalConsultas">0</span>
+                                            <span countUp [endVal]="consultasMes">0</span>
                                         </span>
                                     </div>
                                     <!-- /.media-body -->
@@ -31,7 +83,7 @@
                             <div [routerLink]="['/clientes']" class="py-2 px-4 cursor-pointer">
                                 <div class="counter-w-info media">
                                     <div class="media-body w-50">
-                                        <p class="mr-b-5 fw-600">Total Clientes</p>
+                                        <p class="mr-b-5 fw-600">Nuevos Clientes</p>
                                         <span class="counter-title d-block mx-auto">
                                             <span countUp [endVal]="totalClientes">0</span>
                                         </span>
@@ -53,7 +105,7 @@
                             <div [routerLink]="['/turnos']" class="py-2 px-4 cursor-pointer">
                                 <div class="counter-w-info media">
                                     <div class="media-body w-50">
-                                        <p class="mr-b-5 fw-600">Turnos Próximos</p>
+                                        <p class="mr-b-5 fw-600">Turnos del mes</p>
                                         <span class="counter-title d-block mx-auto">
                                             <span countUp [endVal]="turnosProximos">0</span>
                                         </span>
@@ -69,32 +121,39 @@
                         </div>
                         <!-- /.widget-bg -->
                     </div>
-                    
                 </div>
                 
-                
-                <div class="widget-heading widget-heading-border mx-0">
-                    
-                    <div class="dataTables_length mt-0" id="myTable_length">
-                        <label class="h6 text-themecolor m-0">Estadísticas de
-                            <select [ngModel]="selectMes" (change)="mesChange($event.target.value)" name="myTable_length">
-                                <option *ngFor="let m of meses; let i = index" value="{{i}}">{{m}}</option>
-                            </select>
-                            <select [ngModel]="selectAnio" (change)="anioChange($event.target.value)" name="myTable_length" class="float-right">
-                                <option *ngFor="let a of anios" value="{{a}}">{{a}}</option>
-                            </select>
-                        </label>
-                    </div>
-                </div>
                 <!-- /.widget-heading -->
                 <div class="widget-body px-0">
                     
                     <div class="row">
+                                   
+                        <div class="col-lg-6 mb-2">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Contactos <span class="badge badge-info">{{ consultasMes }}</span></h6>
+                                    <canvas baseChart
+                                    *ngIf="consultasChartData.length > 0"
+                                    [data]="consultasChartData"
+                                    [labels]="consultasChartLabels"
+                                    [chartType]="doughnutChartType"></canvas>
+                                    
+                                    <div *ngIf="cargandoDatos" class="text-center text-muted">
+                                        <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+                                    </div>
+                                    
+                                    <div *ngIf="consultasChartData.length == 0 && !cargandoDatos" class="text-muted text-center">
+                                        <i class="far fa-frown fa-4x d-block mx-auto" aria-hidden="true"></i>
+                                        No hay datos para mostrar
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="col-lg-6 mb-2">
                             <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title">Medios de contacto</h6>
+                                    <h6 class="card-title">Medio de contacto</h6>
                                     <canvas baseChart
                                     *ngIf="mediosChartData.length > 0"
                                     [data]="mediosChartData"
@@ -135,27 +194,6 @@
                             </div>
                         </div>
                         
-                        <div class="col-lg-6 mb-2">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Consultas <span class="badge badge-info">{{ consultasMes }}</span></h6>
-                                    <canvas baseChart
-                                    *ngIf="consultasChartData.length > 0"
-                                    [data]="consultasChartData"
-                                    [labels]="consultasChartLabels"
-                                    [chartType]="doughnutChartType"></canvas>
-                                    
-                                    <div *ngIf="cargandoDatos" class="text-center text-muted">
-                                        <i class="fas fa-circle-notch fa-spin fa-2x"></i>
-                                    </div>
-                                    
-                                    <div *ngIf="consultasChartData.length == 0 && !cargandoDatos" class="text-muted text-center">
-                                        <i class="far fa-frown fa-4x d-block mx-auto" aria-hidden="true"></i>
-                                        No hay datos para mostrar
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     
                     

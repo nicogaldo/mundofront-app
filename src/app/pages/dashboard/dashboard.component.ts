@@ -19,12 +19,14 @@ export class DashboardComponent implements OnInit {
 	turnosProximos: number = 0;
 	consultasMes: number = 0;
 	turnosMes: number = 0;
+	turnosHoy: Consulta[] = [];
+	cargandoH: boolean = false;
 
 	usuario: any = [];
 
 	cargandoDatos: boolean = true;
 
-	now = moment().format('YYYY-MM-DDTHH:mm');
+	now = moment().format();
 	hoy = moment().format('YYYY-MM-DD');
 	mes = moment(this.hoy).month();
 	anio = moment().year();
@@ -36,6 +38,8 @@ export class DashboardComponent implements OnInit {
 	//selects
 	selectMes: number = this.mes;
 	selectAnio: number = this.anio;
+	fromDate: any = moment([this.selectAnio, this.selectMes]).startOf('month').format();
+	toDate: any = moment([this.selectAnio, this.selectMes]).endOf('month').format();
 
 	public mediosChartLabels:string[] = [];
 	public mediosChartData:number[] = [];
@@ -65,41 +69,68 @@ export class DashboardComponent implements OnInit {
 	}
 
   ngOnInit() {
-		this.cargarDatos();
+		this.cargarDatosHoy();
 		this.cargarDatosMes();
 	}
 
 	mesChange( mes ) {
-		this.cargarDatosMes( mes, this.selectAnio )
+		this.selectMes = mes;
+		this.fromDate = moment([this.selectAnio, this.selectMes]).startOf('month').format();
+		this.toDate = moment([this.selectAnio, this.selectMes]).endOf('month').format();
+		this.cargarDatosMes( mes, this.selectAnio );
 	}
 
 	anioChange( anio ) {
-		this.cargarDatosMes( this.selectMes , anio )
+		this.selectAnio = anio;
+		this.fromDate = moment([this.selectAnio, this.selectMes]).startOf('month').format();
+		this.toDate = moment([this.selectAnio, this.selectMes]).endOf('month').format();
+		this.cargarDatosMes( this.selectMes , anio );
 	}
 
 	cargarDatos() {
 
 		//pacientes
-		this._clientService.cargarTotal()
+		/*this._clientService.cargarTotal()
 			.subscribe( (resp: any)=> {
 				this.totalClientes = resp.total;
-			})
+			})*/
 
 		//consultas
-		this._consultaService.cargarTotal()
+		/*this._consultaService.cargarTotal()
 			.subscribe( (resp: any)=> {
 				this.totalConsultas = resp.total;
-			})
+			})*/
 			
 		//proximos turnos
-		this._consultaService.cargarTurnos( this.now )
+		/*this._consultaService.cargarRango( this.selectMes, this.selectAnio, 'turnos' )
 			.subscribe( (resp: any)=> {
-				this.turnosProximos = resp.total;
-			})
+				console.log(resp.consultas);
+				let turnos = resp.consultas.filter(t => moment(t.date_t).format() > this.now && moment(t.date_t).format() <= this.toDate);
+				console.log('turnos');
+				console.log(turnos);
+
+				this.turnosProximos = turnos.length;
+			})*/
 
 	}
 
-	cargarDatosMes( m = this.mes, a = this.anio ) {
+	cargarDatosHoy() {
+
+		let f = this.hoy.split('-');
+		let fecha = {
+			year: f[0],
+			month: f[1],
+			day: f[2]
+		}
+		this.cargandoH = true;
+		this._consultaService.cargarTurnosFecha( fecha )
+			.subscribe( (resp: any) => {
+				this.turnosHoy = resp.consultas.filter(c => c.status === 'RESERVADO' && moment(c.date_t).format('YYYY-MM-DD') === this.hoy);
+				this.cargandoH = false;
+			})
+	}
+
+	cargarDatosMes( m = this.selectMes, a = this.selectAnio ) {
 
 		this.cargandoDatos = true;
 
@@ -114,38 +145,26 @@ export class DashboardComponent implements OnInit {
 		this.consultasMes = 0;
 		this.turnosMes = 0;
 		
-		//turnos por rango de fechas
-		/*this._consultaService.cargarRango( m, a, 'turnos' )
-			.subscribe( (resp: any) => {
-
-				let cArray = resp.consultas;
-
-				//----------  get turnos con asistencia  ----------
-				let turnos = cArray.filter(t => t.date_t);
-				this.turnosMes = turnos.length;
-
-				// prepare to chart
-				let a_count = 0;
-				for( let i = 0; i < turnos.length; ++i ) {
-					if(turnos[i].asistencia_t == true )
-							a_count++;
-				}
-				let a_diff = turnos.length - a_count;
-
-				this.asistenciaChartLabels = ['Asistidos', 'No asistidos'];
-				if (a_count == 0 && a_diff == 0) {
-					this.asistenciaChartData = [];
-				} else {
-					this.asistenciaChartData = [a_count, a_diff];
-				}
-
-			});*/
-
 		//consultas por rango de fechas
+		this._consultaService.cargarTurnosRango( this.fromDate, this.toDate )
+			.subscribe( (resp: any) => {
+				let turnos = resp.turnos;
+
+				/*----------  get prox turnos  ----------*/
+				//let turnos = cArray.filter(t => t.date_t > this.now && t.date_t <= this.toDate);
+				//console.log('turnos');
+				//console.log(turnos);
+				this.turnosProximos = turnos.length;
+			})
+		
 		this._consultaService.cargarRango( m, a )
 			.subscribe( (resp: any) => {
 
 				let cArray = resp.consultas;
+
+				/*----------  get clientes  ----------*/
+				let clientes = cArray.filter(c => c.status === 'RESERVADO' || c.status === 'FINALIZADO' && c.client_c && (c.client_c.createdAt >= this.fromDate && c.client_c.createdAt <= this.toDate));
+				this.totalClientes = clientes.length;
 
 				/*----------  get consultas  ----------*/
 				let consultas = cArray.filter(c => c.medio_c);
@@ -159,7 +178,7 @@ export class DashboardComponent implements OnInit {
 				}
 				let _count = consultas.filter( c => c.medio_c ).length - count;
 
-				this.consultasChartLabels = ['Concretadas', 'No concretadas'];
+				this.consultasChartLabels = ['Reservas', 'Contactos'];
 				if (count == 0 && _count == 0) {
 					this.consultasChartData = [];
 				} else {

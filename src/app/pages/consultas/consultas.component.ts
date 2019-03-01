@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { NgbDatepickerI18n, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 
-import { UsuarioService, ConsultaService, ClientService, PlaceService, ComboService, TurnService, PagerService } from '../../services/service.index';
+import { UsuarioService, ConsultaService, ClientService, PlaceService, ComboService, TurnService, PagerService, I18n, CustomDatepickerI18n, MomentDateFormatter } from '../../services/service.index';
 import { Usuario, Consulta, Cliente, Homenajeado, Place, Combo, Turn } from '../../models/index.model';
 
 import { NgxSmartModalService } from 'ngx-smart-modal';
@@ -11,7 +12,12 @@ import * as moment from 'moment';
 @Component({
   selector: 'app-consultas',
   templateUrl: './consultas.component.html',
-  styleUrls: ['./consultas.component.css']
+  styleUrls: ['./consultas.component.css'],
+  providers: [
+    I18n,
+    { provide: NgbDatepickerI18n, useClass: CustomDatepickerI18n },
+    { provide: NgbDateParserFormatter, useClass: MomentDateFormatter },
+  ]
 })
 export class ConsultasComponent implements OnInit {
 
@@ -31,8 +37,12 @@ export class ConsultasComponent implements OnInit {
   cargandoP: boolean = false;
   combos: Combo[] = [];
   cargandoB: boolean = false;
-  turnos: Turn[] = [];
+  //turnos: Turn[] = [];
+  turnos: any[] = [];
   cargandoT: boolean = false;
+
+  now = moment().format('YYYY-MM-DD');
+  today;
 
   verDatos = '10 25 50 100'.split(' ');
   desde: number = 0;
@@ -57,6 +67,7 @@ export class ConsultasComponent implements OnInit {
       'shomenajeado': new FormControl({value: null, disabled: true}),
 
       'consulta': new FormGroup({
+        'date_c': new FormControl(null, Validators.required),
         'medio_c': new FormControl(null, Validators.required),
         'como_c': new FormControl(null, Validators.required),
         'place_c': new FormControl(null, Validators.required),
@@ -151,6 +162,13 @@ export class ConsultasComponent implements OnInit {
     this.pager.currentPage = 1;
     this.cargarConsultas();
 		//this.cargarCombos();
+
+    let n = moment(this.now).format('YYYY-MM-DD').split('-');
+    this.today = {
+      year: parseInt(n[0]),
+      month: parseInt(n[1]),
+      day: parseInt(n[2])
+    }
   }
 
   /*====================================
@@ -160,8 +178,8 @@ export class ConsultasComponent implements OnInit {
     this.cargando = true;
     this._consultaService.cargarConsultas( this.desde, this.hasta )
       .subscribe( (resp: any) => {
-        this.consultas = resp.consultas.filter(c => c.deleted != true && c.medio_c != null);
-        this.totalRegistros = resp.total;
+        this.consultas = resp.consultas.filter(c => !c.deleted && c.status === 'CONSULTA');
+        this.totalRegistros = this.consultas.length;
         this.cargando = false;
         
         this.setPage(1);
@@ -201,12 +219,41 @@ export class ConsultasComponent implements OnInit {
       });
   }
 
+  the_horarios: any[] = [];
   cargarTurnosDisponibles( id ) {
     this.cargandoT = true;
     this._turnService.cargarPlacesTurns(id)
       .subscribe( (resp: any) => {
-        this.turnos = resp.turn;
-        this.cargandoT = false;
+        //this.turnos = resp.turn;
+
+        //check turno
+        this._consultaService.cargarTurnosFecha( this.formaTurno.value.date_t, id )
+          .subscribe( (resp_c:any) => {
+
+            let turnos_ocupados = resp_c.consultas;
+            let horario;
+
+            if (resp.turn.length > 0) {
+
+              turnos_ocupados.map((item: any) => {
+                return { 'name': item.turno_t.name }
+
+              }).forEach(item => this.the_horarios.push(item));
+
+              resp.turn.map(item => {
+                let ans = this.the_horarios.some(function(arrVal) {
+                  return item.name === arrVal.name;
+
+                });
+
+                if (ans) { item.disabled = true; }
+              })
+
+              this.turnos = resp.turn;
+              this.cargandoT = false;             
+              
+            }
+          })
       })
   }
 
@@ -239,8 +286,7 @@ export class ConsultasComponent implements OnInit {
       this.cargando = true;
       this._consultaService.cargarConsultas( this.desde, this.hasta )
         .subscribe( (resp: any) => {
-          this.consultas = resp.consultas.filter(c => c.deleted != true && c.medio_c != null);
-          console.log(this.consultas);
+          this.consultas = resp.consultas.filter(c => !c.deleted && c.status === 'CONSULTA');
           this.cargando = false;
         });
     }    
@@ -364,9 +410,13 @@ export class ConsultasComponent implements OnInit {
       return
     }
 
+    let d = this.forma.value.consulta.date_c;
+    let date_c = moment([d.year, d.month, d.day]).subtract(1, 'month').toISOString();
+
     let consulta: Consulta = {
       client_c: this.forma.value.scliente,
       homenajeado_c: this.forma.value.shomenajeado,
+      date_c: date_c,
       place_c: this.forma.value.consulta.place_c,
       medio_c: this.forma.value.consulta.medio_c,
       como_c: this.forma.value.consulta.como_c,
@@ -440,8 +490,11 @@ export class ConsultasComponent implements OnInit {
       return
     }
 
+    // fix ng-bootstrap datepiker months array (1 - 12)
+    let date_format = moment(this.formaTurno.value.date_t).subtract(1, 'months').toISOString();
+
     let the_consulta = this.consultas.find(c => c._id === this.formaTurno.value._id);
-    the_consulta.date_t = moment(this.formaTurno.value.date_t).toISOString();
+    the_consulta.date_t = date_format;
     the_consulta.place_t = this.formaTurno.value.place_t;
     the_consulta.turno_t = this.formaTurno.value.turno_t;
     the_consulta.combo_t = this.formaTurno.value.combo_t;
@@ -453,7 +506,6 @@ export class ConsultasComponent implements OnInit {
       the_consulta.status = 'RESERVADO';
     }
 
-    console.log(the_consulta);
     this._consultaService.actualizarConsulta( the_consulta )
       .subscribe( (resp: any) => {
         swal({
