@@ -23,7 +23,7 @@ import { SharedModule } from './shared/shared.module';
   declarations: [
     AppComponent,
     PagesComponent,
-    LoginComponent
+    LoginComponent,
   ],
   imports: [
     BrowserModule,

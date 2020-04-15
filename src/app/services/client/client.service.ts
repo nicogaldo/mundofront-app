@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Usuario, Cliente, Homenajeado } from '../../models/index.model';
 import { URL_SERVICIOS } from '../../config/config';
+import { Usuario, Cliente, Homenajeado } from '../../models/index.model';
+import { UsuarioService } from '../usuario/usuario.service';
 
 import { map } from 'rxjs/operators';
 import swal from 'sweetalert2';
@@ -18,23 +19,9 @@ export class ClientService {
   token: string;
 
   constructor(
-    public http: HttpClient
-  ) {
-    this.cargarStorage();
-  }
-
-  cargarStorage() {
-
-    if (localStorage.getItem('token')) {
-      this.token = localStorage.getItem('token');
-      this.usuario = JSON.parse(localStorage.getItem('usuario'));
-
-    } else {
-      this.token = '';
-      this.usuario = null;
-
-    }
-  }
+    public http: HttpClient,
+    public _usuarioService: UsuarioService,
+  ) { }
 
   /*================================
   =            Get data            =
@@ -49,13 +36,13 @@ export class ClientService {
   ================================*/
   cargarTotal() {
     let url = URL_SERVICIOS + '/cliente/get/total';
-    url += '?token=' + this.token;
+    url += '?token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
   cargarClientes( desde: number = 0, hasta: number = 0  ) {
 
-    let url = URL_SERVICIOS + '/cliente?desde=' + desde + '&hasta=' + hasta + '&token=' + this.token;
+    let url = URL_SERVICIOS + '/cliente?desde=' + desde + '&hasta=' + hasta + '&token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
@@ -65,7 +52,7 @@ export class ClientService {
   }
 
   crearCliente(cliente: Cliente) {
-    let url = URL_SERVICIOS + '/cliente?token=' + this.token;
+    let url = URL_SERVICIOS + '/cliente?token=' + this._usuarioService.token;
     return this.http.post(url, cliente).pipe(
       map((resp: any) => {
 
@@ -84,7 +71,7 @@ export class ClientService {
   actualizarCliente(cliente: Cliente) {
 
     let url = URL_SERVICIOS + '/cliente/' + cliente._id;
-    url += '?token=' + this.token;
+    url += '?token=' + this._usuarioService.token;
 
     return this.http.put(url, cliente).pipe(
       map((resp: any) => {
@@ -110,7 +97,7 @@ export class ClientService {
 
   borrarCliente( id: string ) {
 
-    let url = URL_SERVICIOS + '/cliente/' + id + '?token=' + this.token;
+    let url = URL_SERVICIOS + '/cliente/' + id + '?token=' + this._usuarioService.token;
 
     return this.http.delete( url ).pipe(
       map( resp => {
@@ -131,7 +118,7 @@ export class ClientService {
   ===================================*/
   cargarHomenajeados( desde: number = 0, hasta: number = 0  ) {
 
-    let url = URL_SERVICIOS + '/homenajeado?desde=' + desde + '&hasta=' + hasta + '&token=' + this.token;
+    let url = URL_SERVICIOS + '/homenajeado?desde=' + desde + '&hasta=' + hasta + '&token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
@@ -141,7 +128,7 @@ export class ClientService {
   }
 
   crearHomenajeado(homenajeado: Homenajeado) {
-    let url = URL_SERVICIOS + '/homenajeado?token=' + this.token;
+    let url = URL_SERVICIOS + '/homenajeado?token=' + this._usuarioService.token;
     return this.http.post(url, homenajeado).pipe(
       map((resp: any) => {
 
@@ -160,7 +147,7 @@ export class ClientService {
   actualizarHomenajeado(homenajeado: Homenajeado) {
 
     let url = URL_SERVICIOS + '/homenajeado/' + homenajeado._id;
-    url += '?token=' + this.token;
+    url += '?token=' + this._usuarioService.token;
 
     return this.http.put(url, homenajeado).pipe(
       map((resp: any) => {
@@ -187,7 +174,7 @@ export class ClientService {
 
   borrarHomenajeado( id: string ) {
 
-    let url = URL_SERVICIOS + '/homenajeado/' + id + '?token=' + this.token;
+    let url = URL_SERVICIOS + '/homenajeado/' + id + '?token=' + this._usuarioService.token;
 
     return this.http.delete( url ).pipe(
       map( resp => {

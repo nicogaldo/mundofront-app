@@ -26,20 +26,20 @@ export class DashboardComponent implements OnInit {
 
 	cargandoDatos: boolean = true;
 
-	now = moment().format();
-	hoy = moment().format('YYYY-MM-DD');
-	mes = moment(this.hoy).month();
-	anio = moment().year();
+	now = moment.utc().format();
+	hoy = moment.utc().format('YYYY-MM-DD');
+	mes = moment.utc(this.hoy).month();
+	anio = moment.utc().year();
 
 	titulo: string;
 	meses = moment.months();
-	anios = [ 2019, 2018, 2017 ];
+	anios = [ 2020, 2019, 2018, 2017 ];
 
 	//selects
 	selectMes: number = this.mes;
 	selectAnio: number = this.anio;
-	fromDate: any = moment([this.selectAnio, this.selectMes]).startOf('month').format();
-	toDate: any = moment([this.selectAnio, this.selectMes]).endOf('month').format();
+	fromDate: any = moment.utc([this.selectAnio, this.selectMes]).startOf('month').format();
+	toDate: any = moment.utc([this.selectAnio, this.selectMes]).endOf('month').format();
 
 	public mediosChartLabels:string[] = [];
 	public mediosChartData:number[] = [];
@@ -75,15 +75,15 @@ export class DashboardComponent implements OnInit {
 
 	mesChange( mes ) {
 		this.selectMes = mes;
-		this.fromDate = moment([this.selectAnio, this.selectMes]).startOf('month').format();
-		this.toDate = moment([this.selectAnio, this.selectMes]).endOf('month').format();
+		this.fromDate = moment.utc([this.selectAnio, this.selectMes]).startOf('month').format();
+		this.toDate = moment.utc([this.selectAnio, this.selectMes]).endOf('month').format();
 		this.cargarDatosMes( mes, this.selectAnio );
 	}
 
 	anioChange( anio ) {
 		this.selectAnio = anio;
-		this.fromDate = moment([this.selectAnio, this.selectMes]).startOf('month').format();
-		this.toDate = moment([this.selectAnio, this.selectMes]).endOf('month').format();
+		this.fromDate = moment.utc([this.selectAnio, this.selectMes]).startOf('month').format();
+		this.toDate = moment.utc([this.selectAnio, this.selectMes]).endOf('month').format();
 		this.cargarDatosMes( this.selectMes , anio );
 	}
 
@@ -105,7 +105,7 @@ export class DashboardComponent implements OnInit {
 		/*this._consultaService.cargarRango( this.selectMes, this.selectAnio, 'turnos' )
 			.subscribe( (resp: any)=> {
 				console.log(resp.consultas);
-				let turnos = resp.consultas.filter(t => moment(t.date_t).format() > this.now && moment(t.date_t).format() <= this.toDate);
+				let turnos = resp.consultas.filter(t => moment.utc(t.date_t).format() > this.now && moment.utc(t.date_t).format() <= this.toDate);
 				console.log('turnos');
 				console.log(turnos);
 
@@ -125,7 +125,7 @@ export class DashboardComponent implements OnInit {
 		this.cargandoH = true;
 		this._consultaService.cargarTurnosFecha( fecha )
 			.subscribe( (resp: any) => {
-				this.turnosHoy = resp.consultas.filter(c => c.status === 'RESERVADO' && moment(c.date_t).format('YYYY-MM-DD') === this.hoy);
+				this.turnosHoy = resp.consultas.filter(c => c.status === 'RESERVADO' && moment.utc(c.date_t).format('YYYY-MM-DD') === this.hoy);
 				this.cargandoH = false;
 			})
 	}
@@ -154,10 +154,12 @@ export class DashboardComponent implements OnInit {
 				//let turnos = cArray.filter(t => t.date_t > this.now && t.date_t <= this.toDate);
 				//console.log('turnos');
 				//console.log(turnos);
+
 				this.turnosProximos = turnos.length;
 			})
 		
-		this._consultaService.cargarRango( m, a )
+		//this._consultaService.cargarRango( m, a )
+		this._consultaService.cargarRango( this.fromDate, this.toDate )
 			.subscribe( (resp: any) => {
 
 				let cArray = resp.consultas;
@@ -168,6 +170,7 @@ export class DashboardComponent implements OnInit {
 
 				/*----------  get consultas  ----------*/
 				let consultas = cArray.filter(c => c.medio_c);
+				console.log('consultas', consultas);
 				this.consultasMes = consultas.length;
 
 				// prepare to chart

@@ -25,6 +25,10 @@
             "styles": [
               //"node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css",
               "node_modules/ngx-smart-modal/ngx-smart-modal.scss",
+              "node_modules/@fullcalendar/core/main.css",
+              "node_modules/@fullcalendar/list/main.css",
+              "node_modules/@fullcalendar/daygrid/main.css",
+              "node_modules/@fullcalendar/timegrid/main.css",
               "node_modules/@ng-select/ng-select/themes/material.theme.css",
               "src/styles.css"
             ],
@@ -35,7 +39,7 @@
               //"node_modules/datatables.net-buttons/js/buttons.colVis.min.js",
               "node_modules/datatables.net-buttons/js/buttons.html5.min.js",
               "node_modules/@fortawesome/fontawesome-free/js/all.min.js",
-              "node_modules/chart.js/src/chart.js",
+              "node_modules/chart.js/dist/Chart.bundle.min.js",
             ]
           },
           "configurations": {

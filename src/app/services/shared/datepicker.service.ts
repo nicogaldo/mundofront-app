@@ -23,7 +23,7 @@ export class MomentDateFormatter extends NgbDateParserFormatter {
 /*================================
 =            Language            =
 ================================*/
-import {Component, Injectable} from '@angular/core';
+import { Component, Injectable } from '@angular/core';
 
 const I18N_VALUES = {
   'es': {
@@ -62,6 +62,3 @@ export class CustomDatepickerI18n extends NgbDatepickerI18n {
     return `${date.day}-${date.month}-${date.year}`;
   }
 }
-
-
-

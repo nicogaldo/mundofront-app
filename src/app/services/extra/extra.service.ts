@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Usuario, Extra } from '../../models/index.model';
 import { URL_SERVICIOS } from '../../config/config';
+import { Usuario, Extra } from '../../models/index.model';
+import { UsuarioService } from '../usuario/usuario.service';
 
 import { map } from 'rxjs/operators';
 import swal from 'sweetalert2';
@@ -17,38 +18,24 @@ export class ExtraService {
   token: string;
 
   constructor(
-    public http: HttpClient
-  ) {
-    this.cargarStorage();
-  }
-
-  cargarStorage() {
-
-    if (localStorage.getItem('token')) {
-      this.token = localStorage.getItem('token');
-      this.usuario = JSON.parse(localStorage.getItem('usuario'));
-
-    } else {
-      this.token = '';
-      this.usuario = null;
-
-    }
-  }
+    public http: HttpClient,
+    public _usuarioService: UsuarioService,
+  ) { }
 
   cargarExtras( desde: number = 0, hasta: number = 5  ) {
     let url = URL_SERVICIOS + '/extra?desde=' + desde + '&hasta=' + hasta;
-    url += '&token=' + this.token;
+    url += '&token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
   cargarPlacesExtras( id ) {
     let url = URL_SERVICIOS + '/extra/place/' + id ;
-    url += '?token=' + this.token;
+    url += '?token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
   crearExtra(extra: Extra) {
-    let url = URL_SERVICIOS + '/extra?token=' + this.token;
+    let url = URL_SERVICIOS + '/extra?token=' + this._usuarioService.token;
     return this.http.post(url, extra).pipe(
       map((resp: any) => {
 
@@ -67,7 +54,7 @@ export class ExtraService {
   actualizarExtra(extra: Extra) {
 
     let url = URL_SERVICIOS + '/extra/' + extra._id;
-    url += '?token=' + this.token;
+    url += '?token=' + this._usuarioService.token;
 
     return this.http.put(url, extra).pipe(
       map((resp: any) => {
@@ -93,7 +80,7 @@ export class ExtraService {
 
   borrarExtra( id: string ) {
 
-    let url = URL_SERVICIOS + '/extra/' + id + '?token=' + this.token;
+    let url = URL_SERVICIOS + '/extra/' + id + '?token=' + this._usuarioService.token;
     return this.http.delete( url ).pipe(
       map( resp => {
         swal({

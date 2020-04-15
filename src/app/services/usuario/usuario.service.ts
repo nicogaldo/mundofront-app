@@ -106,7 +106,7 @@ export class UsuarioService {
     document.body.classList.add('body-bg-full');
 
     this.router.navigate(['/ingresar']);
-    location.reload();
+    //location.reload();
   }
 
   login(usuario: Usuario, recordar: boolean = false) {

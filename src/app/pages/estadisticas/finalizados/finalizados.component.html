@@ -1,0 +1,230 @@
+<div class="container-fluid px-0">
+	<div class="widget-list">
+		<div class="row">
+			<div class="widget-holder col-md-12">
+				<div class="widget-bg">
+					<div class="widget-heading widget-heading-border border-bottom-0">
+
+						<div class="row d-flex w-100">
+							<div class="col-12">
+								<label class="h6 mr-2">Total por mes</label>
+							</div>
+							<div class="col-12">
+
+								<div class="table-responsive">
+									<table class="table table-dark text-center mb-0">
+									  <thead>
+									    <tr>
+									      <th (click)="mesChange(i)" *ngFor="let m of mesesShort; let i = index" [ngClass]="{ 'bg-primary': i == selectMes}" role="button"> {{ m }} </th>
+									    </tr>
+									  </thead>
+									  <tbody>
+									    <tr>
+									      <th *ngFor="let m of finalizadosAno; let i = index" [ngClass]="{ 'bg-primary': i == selectMes}"> {{ m.count }} </th>
+									    </tr>
+									  </tbody>
+									</table>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+					<div class="widget-heading mb-3 py-0">
+						<!-- <div class="dataTables_length mt-0" id="myTable_length">
+							<label class="h6 text-themecolor m-0">Finalizados de
+								<select [ngModel]="selectMes" (change)="mesChange($event.target.value)" name="myTable_length">
+									<option *ngFor="let m of meses; let i = index" value="{{i}}">{{ m }}</option>
+								</select>
+								<select [ngModel]="selectAnio" (change)="anioChange($event.target.value)" name="myTable_length" class="float-right">
+									<option *ngFor="let a of anios" value="{{a}}">{{a}}</option>
+								</select>
+							</label>
+						</div> -->
+
+						<div class="dataTables_length form-material mt-0" id="myTable_length">
+
+							<label class="h6 my-0 mr-2">Finalizados de</label>
+							<div ngbDropdown class="d-inline-flex" (openChange)="openChange($event)" placement="bottom-left" [autoClose]="'outside'" #myDrop="ngbDropdown">
+						    <button class="btn btn-primary" ngbDropdownToggle>
+					        <span *ngIf="(from && to) && (from != to)">{{from | amDateFormat:'LL'}} - {{to | amDateFormat:'LL'}}</span>
+					        <span *ngIf="(from && to) && (from === to)">{{from | amDateFormat:'LL'}}</span>
+					        <span *ngIf="!from && !to">Elegir periodo</span>
+						    </button>
+						    <div ngbDropdownMenu class="m-0 p-0 date-range-dropdown animation-duration-200 animation-scale-up animation-top-right">
+					        <ngb-datepicker #dp ngModel [displayMonths]="1" [dayTemplate]="t" [navigation]="'arrows'" [outsideDays]="'collapsed'">
+					        </ngb-datepicker>
+						    </div>
+							</div>
+
+							<ng-template #t let-date="date" let-focused="focused">
+						    <span class="custom-day" (click)="dateChange(date)" [class.focused]="focused" [class.range]="isFrom(date) || isTo(date) || isInside(date) || isHovered(date)" [class.faded]="isHovered(date) || isInside(date)" (mouseenter)="hoveredDate = date" (mouseleave)="hoveredDate = null">
+							    {{ date.day }}
+							  </span>
+							</ng-template>
+
+						</div>
+						
+						<!-- <button (click)="nuevoHorario()" class="btn btn-primary text-uppercase ml-auto d-flex">Filtrar</button> -->
+					</div>
+					<!-- /.widget-heading -->
+					<div class="widget-body pt-1">
+						
+						<div class="d-block">
+							<div class="row">
+
+								<div class="col-sm-12 mb-3">
+									
+                  <div class="card">
+                    <div class="card-body px-1">
+                      <h6 class="card-title px-3">Finalizados <span class="badge badge-info">{{ finalizados.length }}</span></h6>
+											<canvas baseChart height="200" width="900"
+											*ngIf="finalizadosChartData.length > 0"
+											[datasets]="finalizadosChartData"
+											[labels]="finalizadosChartLabels"
+											[options]="chartOptions"
+											[chartType]="finalizadosChartType"></canvas>
+
+											<div *ngIf="cargandoF" class="text-center text-muted">
+		                      <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+		                  </div>
+											
+										</div>
+									</div>
+								</div>
+								
+								<div class="col-sm-6 mb-3">
+
+	                <div class="card">
+	                  <div class="card-body px-1">
+	                    <h6 class="card-title px-3">Lugares</h6>
+											<canvas baseChart
+											*ngIf="placeChartData.length > 0"
+											[data]="placeChartData"
+											[labels]="placeChartLabels"
+											[chartType]="placeChartType"></canvas>
+
+											<div *ngIf="cargandoF" class="text-center text-muted">
+		                      <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+		                  </div>
+
+		                </div>
+									</div>
+
+								</div>
+								
+								<div class="col-sm-6 mb-3">
+
+                  <div class="card">
+                    <div class="card-body px-1">
+                      <h6 class="card-title px-3">Medio de contacto</h6>
+											<canvas baseChart
+											*ngIf="medioChartData.length > 0"
+											[data]="medioChartData"
+											[labels]="medioChartLabels"
+											[chartType]="medioChartType"></canvas>
+
+											<div *ngIf="cargandoF" class="text-center text-muted">
+		                      <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+		                  </div>
+
+		                </div>
+		              </div>
+
+								</div>
+								
+								<div class="col-sm-12 mb-1 pr-0 border-top">
+									<h6>Ver Listado</h6>
+								</div>
+
+								<div class="col-sm-4 mb-1 pr-0">
+									<label class="mb-0">Estado</label>
+									
+									<select (change)="aplicarFiltroLista()" [(ngModel)]="tipo" class="form-control mr-2">
+										<option value="" selected="">Todo</option>
+										<!-- <option value="CONSULTA">Consulta</option> -->
+										<option value="RESERVADO">Reservado</option>
+										<option value="FINALIZADO">Finalizado</option>
+										<option value="CANCELADO">Cancelado</option>
+									</select>
+								</div>
+								<div class="col-sm-4 mb-1 pr-0">
+									<label class="mb-0">Espacio</label>
+									<select (change)="aplicarFiltroLista()" [(ngModel)]="place" class="form-control mr-2">
+										<option value="" selected="">Todo</option>
+										<option *ngFor="let p of places" [value]="p._id">{{ p.name }}</option>
+									</select>
+								</div>
+								<div class="col-sm-4 mb-1 pr-0">
+									<label class="mb-0">Medio de contacto</label>
+									<select (change)="aplicarFiltroLista()" [(ngModel)]="contact" class="form-control mr-2">
+										<option value="" selected="">Todo</option>
+										
+										<option value="E-mail">E-mail</option>
+										<option value="Personalmente">Personalmente</option>
+										<option value="Redes Sociales">Redes Sociales</option>
+										<option value="Teléfono">Teléfono</option>
+										<option value="WhatsApp">WhatsApp</option>
+									</select>
+								</div>
+							</div>
+							
+						</div>
+						
+						<div class="w-100 mt-4">
+
+							<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-hover w-100">
+								<thead>
+									<tr>
+										<th scope="col">Nombre</th>
+										<!-- <th scope="col">Homenajeado</th> -->
+										<th scope="col" title="Lugar de consulta" nowrap>Lugar C</th>
+										<th scope="col" title="¿Cómo nos conoció?">¿Cómo &hellip;</th>
+										<th scope="col" title="Medio de contacto">Contacto</th>
+										<th scope="col" title="Estado">Estado</th>
+										<th scope="col">Reserva</th>
+										<th scope="col" title="Lugar de reserva" nowrap>Lugar R</th>
+										<th scope="col">Atendió</th>
+										<th class="text-right">Fecha</th>
+									</tr>
+								</thead>
+								<tbody *ngIf="c_filtro?.length != 0">
+									<tr *ngFor="let c of c_filtro">
+										<td>{{ c.client_c.nombre }} {{ c.client_c.apellido }}</td>
+										<!-- <td>{{ c.homenajeado_c.nombre }} {{ c.homenajeado_c.apellido }}</td> -->
+										
+										<td>{{ c.place_c.name }}</td>
+										<td>{{ c.como_c }}</td>
+										<td>{{ c.medio_c }}</td>
+										<td>{{ c.status }}</td>
+										
+										<td nowrap>
+											<span *ngIf="!c.date_t">
+												<i class="far fa-calendar-times text-danger"></i> Sin reserva
+											</span>
+											
+											<span *ngIf="c.date_t">
+												<i class="far" [ngClass]="{'fa-calendar-times text-warning': c.status === 'CANCELADO', 'fa-calendar-check text-success':  c.status != 'CANCELADO' }"></i> {{ c.date_t | amFromUtc | amLocale:'es' | amDateFormat:'DD/MM/YY' }} {{ c.turno_t.from }} - {{ c.turno_t.to }}
+											</span>
+										</td>
+										
+										<td nowrap>{{ c.place_t ? c.place_t.name : '-' }}</td>
+										<td>{{ c.usuario.nombre }}</td>
+										<td class="text-nowrap text-right"> {{ c.createdAt | amFromUtc | amLocale:'es' | amDateFormat:'DD/MM [-] HH:mm' }} </td>
+									</tr>
+								</tbody>
+							</table>
+							
+						</div>
+						
+					</div>
+					<!-- /.widget-body -->
+				</div>
+				<!-- /.widget-bg -->
+			</div>
+			<!-- /.widget-holder -->
+		</div>
+		<!-- /.row -->
+	</div>
+	<!-- /.widget-list -->
+</div>

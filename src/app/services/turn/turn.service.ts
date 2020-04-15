@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Usuario, Turn } from '../../models/index.model';
 import { URL_SERVICIOS } from '../../config/config';
+import { Usuario, Turn } from '../../models/index.model';
+import { UsuarioService } from '../usuario/usuario.service';
 
 import { map } from 'rxjs/operators';
 import swal from 'sweetalert2';
@@ -17,38 +18,24 @@ export class TurnService {
   token: string;
 
   constructor(
-    public http: HttpClient
-  ) {
-    this.cargarStorage();
-  }
-
-  cargarStorage() {
-
-    if (localStorage.getItem('token')) {
-      this.token = localStorage.getItem('token');
-      this.usuario = JSON.parse(localStorage.getItem('usuario'));
-
-    } else {
-      this.token = '';
-      this.usuario = null;
-
-    }
-  }
+    public http: HttpClient,
+    public _usuarioService: UsuarioService,
+  ) { }
 
   cargarTurns( desde: number = 0, hasta: number = 5  ) {
     let url = URL_SERVICIOS + '/turn?desde=' + desde + '&hasta=' + hasta;
-    url += '&token=' + this.token;
+    url += '&token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
   cargarPlacesTurns( id ) {
     let url = URL_SERVICIOS + '/turn/places/' + id;
-    url += '?token=' + this.token;
+    url += '?token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
   crearTurn(turn: Turn) {
-    let url = URL_SERVICIOS + '/turn?token=' + this.token;
+    let url = URL_SERVICIOS + '/turn?token=' + this._usuarioService.token;
     return this.http.post(url, turn).pipe(
       map((resp: any) => {
 
@@ -67,7 +54,7 @@ export class TurnService {
   actualizarTurn(turn: Turn) {
 
     let url = URL_SERVICIOS + '/turn/' + turn._id;
-    url += '?token=' + this.token;
+    url += '?token=' + this._usuarioService.token;
 
     return this.http.put(url, turn).pipe(
       map((resp: any) => {
@@ -93,7 +80,7 @@ export class TurnService {
 
   borrarTurn( id: string ) {
 
-    let url = URL_SERVICIOS + '/turn/' + id + '?token=' + this.token;
+    let url = URL_SERVICIOS + '/turn/' + id + '?token=' + this._usuarioService.token;
 
     return this.http.delete( url ).pipe(
       map( resp => {

@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbDatepickerI18n, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 
-import { UsuarioService, ConsultaService, ClientService, PlaceService, ComboService, TurnService, PagerService, I18n, CustomDatepickerI18n, MomentDateFormatter } from '../../services/service.index';
-import { Usuario, Consulta, Cliente, Homenajeado, Place, Combo, Turn } from '../../models/index.model';
+import { UsuarioService, ConsultaService, ClientService, PlaceService, ComboService, TurnService, CajaService, PagerService, I18n, CustomDatepickerI18n, MomentDateFormatter } from '../../services/service.index';
+import { Usuario, Consulta, Cliente, Homenajeado, Place, Combo, Turn, Caja } from '../../models/index.model';
 
 import { NgxSmartModalService } from 'ngx-smart-modal';
 import swal from 'sweetalert2';
@@ -33,7 +33,8 @@ export class ConsultasComponent implements OnInit {
   cargandoC: boolean = true;
   homenajeados: Homenajeado[] = [];
   cargandoH: boolean = false;
-  places: Place[] = [];
+  places_c: Place[] = [];
+  places_t: Place[] = [];
   cargandoP: boolean = false;
   combos: Combo[] = [];
   cargandoB: boolean = false;
@@ -41,7 +42,7 @@ export class ConsultasComponent implements OnInit {
   turnos: any[] = [];
   cargandoT: boolean = false;
 
-  now = moment().format('YYYY-MM-DD');
+  now = moment.utc().format('YYYY-MM-DD');
   today;
 
   verDatos = '10 25 50 100'.split(' ');
@@ -58,6 +59,7 @@ export class ConsultasComponent implements OnInit {
     public _placeService: PlaceService,
     public _comboService: ComboService,
     public _turnService: TurnService,
+    public _cajaService: CajaService,
 		public _pagerService: PagerService,
 		public ngxSmartModalService: NgxSmartModalService,
   ) {
@@ -91,6 +93,8 @@ export class ConsultasComponent implements OnInit {
       'combo_t': new FormControl(null, Validators.required),
       'sena_t': new FormControl(null, Validators.required),
       'sena_m': new FormControl(null, Validators.required),
+      't_tipo': new FormControl(null),
+      't_marca': new FormControl(null),
       'detalles_t': new FormControl(null),
     })
 
@@ -113,7 +117,6 @@ export class ConsultasComponent implements OnInit {
     })
 
     this.forma.get('scliente').valueChanges.subscribe( (id: string) => {
-
       if (!id) {
         this.forma.get('shomenajeado').disable();
       } else {
@@ -131,6 +134,17 @@ export class ConsultasComponent implements OnInit {
       'colegio': new FormControl(null)
     })
 
+    this.formaTurno.get('sena_m').valueChanges.subscribe( (val: string) => {
+      if (val == 'Tarjeta') {
+        this.formaTurno.get('t_tipo').setValidators(Validators.required);
+        this.formaTurno.get('t_marca').setValidators(Validators.required);
+      } else if (val != 'Tarjeta') {
+        this.formaTurno.get('t_tipo').clearValidators();
+        this.formaTurno.get('t_marca').clearValidators();
+      }
+      this.formaTurno.get('t_tipo').updateValueAndValidity();
+      this.formaTurno.get('t_marca').updateValueAndValidity();
+    })
 
     /*=========================================
     =             Valid Date Turno            =
@@ -142,7 +156,6 @@ export class ConsultasComponent implements OnInit {
     //    this.forma.get('turno.combo_t').setValidators(Validators.required);
     //    this.forma.get('turno.turno_t').setValidators(Validators.required);
     //  } else if (date === null) {
-    //    this.forma.get('turno.sena_t').clearValidators();
     //    this.forma.get('turno.place_t').clearValidators();
     //    this.forma.get('turno.combo_t').clearValidators();
     //    this.forma.get('turno.turno_t').clearValidators();
@@ -155,7 +168,6 @@ export class ConsultasComponent implements OnInit {
     //  this.forma.get('turno.combo_t').updateValueAndValidity();
     //  this.forma.get('turno.turno_t').updateValueAndValidity();
     //})
-
   }
 
   ngOnInit() {
@@ -163,7 +175,7 @@ export class ConsultasComponent implements OnInit {
     this.cargarConsultas();
 		//this.cargarCombos();
 
-    let n = moment(this.now).format('YYYY-MM-DD').split('-');
+    let n = this.now.split('-');
     this.today = {
       year: parseInt(n[0]),
       month: parseInt(n[1]),
@@ -178,8 +190,8 @@ export class ConsultasComponent implements OnInit {
     this.cargando = true;
     this._consultaService.cargarConsultas( this.desde, this.hasta )
       .subscribe( (resp: any) => {
-        this.consultas = resp.consultas.filter(c => !c.deleted && c.status === 'CONSULTA');
-        this.totalRegistros = this.consultas.length;
+        this.consultas = resp.consultas.filter(c => !c.deleted);
+        this.totalRegistros = resp.total;
         this.cargando = false;
         
         this.setPage(1);
@@ -214,7 +226,9 @@ export class ConsultasComponent implements OnInit {
     this.cargandoP = true;
     this._placeService.cargarPlaces( 0 , 0)
       .subscribe( (resp: any) => {
-        this.places = resp.places.filter(p => p.deleted != true);
+        this.places_c = resp.places.filter(p => !p.deleted);
+        this.places_t = resp.places.filter(p => !p.deleted && p.desc != '@all@');
+        //this.places.push({ name: 'Todos', _id: 'all'});
         this.cargandoP = false;
       });
   }
@@ -222,36 +236,40 @@ export class ConsultasComponent implements OnInit {
   the_horarios: any[] = [];
   cargarTurnosDisponibles( id ) {
     this.cargandoT = true;
+    this.the_horarios = [];
+
     this._turnService.cargarPlacesTurns(id)
       .subscribe( (resp: any) => {
-        //this.turnos = resp.turn;
+
+
+        console.log('datepiker consultas', this.formaTurno.value.date_t);
 
         //check turno
         this._consultaService.cargarTurnosFecha( this.formaTurno.value.date_t, id )
           .subscribe( (resp_c:any) => {
 
             let turnos_ocupados = resp_c.consultas;
-            let horario;
 
             if (resp.turn.length > 0) {
 
-              turnos_ocupados.map((item: any) => {
-                return { 'name': item.turno_t.name }
+              turnos_ocupados.map((i: any) => {
 
-              }).forEach(item => this.the_horarios.push(item));
+                if (i.status === 'RESERVADO' || i.status === 'FINALIZADO') {
+                  return { 'name': i.turno_t.name }
+                }
+                return true;
+                
+              }).forEach(i => this.the_horarios.push(i));
 
-              resp.turn.map(item => {
+              resp.turn.map(k => {
                 let ans = this.the_horarios.some(function(arrVal) {
-                  return item.name === arrVal.name;
-
+                  return k.name === arrVal.name;
                 });
-
-                if (ans) { item.disabled = true; }
+                if (ans) { k.disabled = true; }
               })
 
               this.turnos = resp.turn;
-              this.cargandoT = false;             
-              
+              this.cargandoT = false;
             }
           })
       })
@@ -278,18 +296,19 @@ export class ConsultasComponent implements OnInit {
 
   setPage(page: number, termino: string = '', hasta: number = this.hasta) {
 
-    this.pager = this._pagerService.getPager(this.totalRegistros, page, this.hasta);
+    this.pager = this._pagerService.getPager(this.totalRegistros, page, hasta);
     this.desde = this.pager.startIndex;
 
     // get current page of items
     if (!termino) {
       this.cargando = true;
-      this._consultaService.cargarConsultas( this.desde, this.hasta )
+      this._consultaService.cargarConsultas( this.desde, hasta )
         .subscribe( (resp: any) => {
-          this.consultas = resp.consultas.filter(c => !c.deleted && c.status === 'CONSULTA');
+          this.consultas = resp.consultas.filter(c => !c.deleted);
           this.cargando = false;
         });
     }    
+
   }
 
   buscarDatos( termino: string ) {
@@ -411,7 +430,8 @@ export class ConsultasComponent implements OnInit {
     }
 
     let d = this.forma.value.consulta.date_c;
-    let date_c = moment([d.year, d.month, d.day]).subtract(1, 'month').toISOString();
+    //let date_c = moment.utc([d.year, d.month, d.day]).subtract(1, 'month').toISOString();
+    let date_c = moment.utc(d.year + '-' + d.month + '-' + d.day, 'YYYY-MM-DD').toISOString();
 
     let consulta: Consulta = {
       client_c: this.forma.value.scliente,
@@ -471,7 +491,7 @@ export class ConsultasComponent implements OnInit {
   =====================================*/
   agendarTurno( data ) {
 
-    if (!this.places.length) {
+    if (!this.places_c.length || !this.places_t.length) {
       this.cargarClientes();
       this.cargarLugares();
       //this.cargarCombos();
@@ -490,46 +510,87 @@ export class ConsultasComponent implements OnInit {
       return
     }
 
-    // fix ng-bootstrap datepiker months array (1 - 12)
-    let date_format = moment(this.formaTurno.value.date_t).subtract(1, 'months').toISOString();
+    let combo = this.combos.find(c => c._id === this.formaTurno.value.combo_t);
 
-    let the_consulta = this.consultas.find(c => c._id === this.formaTurno.value._id);
+    // fix ng-bootstrap datepiker months array (1 - 12)
+    let d: any = this.formaTurno.value.date_t;
+    let date_format = moment.utc(d.year + '-' + d.month + '-' + d.day, 'YYYY-MM-DD').toISOString();
+    //date_format.month = date_format.month - 1;
+    //date_format = moment.utc(date_format).toISOString();
+    
+    // provisorio
+    let sena_t = this.formaTurno.value.sena_t;
+    let t_tipo = this.formaTurno.value.t_tipo;
+    let t_marca = this.formaTurno.value.t_marca;
+
+    let the_consulta: any = this.consultas.find(c => c._id === this.formaTurno.value._id);
     the_consulta.date_t = date_format;
     the_consulta.place_t = this.formaTurno.value.place_t;
     the_consulta.turno_t = this.formaTurno.value.turno_t;
     the_consulta.combo_t = this.formaTurno.value.combo_t;
-    the_consulta.sena_t = this.formaTurno.value.sena_t;
     the_consulta.sena_m = this.formaTurno.value.sena_m;
-    the_consulta.detalles_t = this.formaTurno.value.detalles_t;    
+    the_consulta.detalles_t = this.formaTurno.value.detalles_t;
 
-    if (the_consulta.sena_t) {
+    console.log('date_format', date_format);
+    console.log('the_consulta.date_t', the_consulta.date_t);
+    //console.log('combo', combo);
+
+    let the_mov: Caja;
+    if (sena_t) {
       the_consulta.status = 'RESERVADO';
+      //the_consulta.pago = [];
+      //the_consulta.sena_date = moment().toDate().toISOString();
+      the_consulta.to_pay = combo.price;
+      the_consulta.balance = combo.price - sena_t;
+
+      the_mov = {
+        consulta: the_consulta._id,
+        cliente: the_consulta.client_c._id,
+        tipo: 'INGRESO',
+        medio: the_consulta.sena_m,
+        t_tipo: t_tipo,
+        t_marca: t_marca,
+        monto: sena_t,
+        descuento: 0,
+        extras: null,
+        total: sena_t,
+        detalles: 'SEÑA',
+      }
     }
 
-    this._consultaService.actualizarConsulta( the_consulta )
+    // guardar la consulta
+    console.log('the_consulta', the_consulta);
+    console.log('the_mov', the_mov);
+    this._cajaService.crearMovimiento( the_mov )
       .subscribe( (resp: any) => {
-        swal({
-          type: 'success',
-          title: '¡Turno reservado!',
-          text: '',
-          showConfirmButton: false,
-          timer: 2000
-        });
-        this.ngxSmartModalService.getModal('nuevoTurnoModal').close();
-        this.cargarConsultas();
+
+        the_consulta.pago.push(resp._id);
+        console.log('the_consulta con pago', the_consulta);
+
+        this._consultaService.actualizarConsulta( the_consulta )
+          .subscribe( (resp: any) => {
+
+            swal({
+              type: 'success',
+              title: '¡Turno reservado!',
+              text: '',
+              showConfirmButton: false,
+              timer: 2000
+            });
+            this.ngxSmartModalService.getModal('nuevoTurnoModal').close();
+            this.cargarConsultas();
+          })
       })
   }
-  
-  
 
   /*====================================
   =            Ver Consulta            =
   ====================================*/
   verConsulta( id ) {
-    let the_consulta = this.consultas.find(c => c._id === id);
-    //console.log(the_consulta);
+    let view_consulta = this.consultas.find(c => c._id === id);
+    //console.log('view_consulta', view_consulta);
     this.ngxSmartModalService.getModal('vcM').open();
-    this.ngxSmartModalService.setModalData( the_consulta, 'vcM' );
+    this.ngxSmartModalService.setModalData( view_consulta, 'vcM' );
   }
 
   resetModal() {
@@ -570,8 +631,5 @@ export class ConsultasComponent implements OnInit {
       }
     });
   }
-  
-  
-  
-
+ 
 }

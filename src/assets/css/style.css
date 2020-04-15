@@ -26178,10 +26178,11 @@ body.rtl .pagination .page-item:first-child .page-link {
 
     font-family: "Poppins", "Helvetica Neue", Arial, sans-serif;
 
-    color: #999;
-    border-color: rgba(238, 241, 242, .5);
-    border-radius: 0;
-    background: transparent;
+    color: #fff;
+    border-color: #1976d2;
+    /*border-color: rgba(238, 241, 242, .5);*/
+    /*border-radius: 0;*/
+    background: transparent;*/
     -webkit-box-shadow: none;
             box-shadow: none;
 }

@@ -72,7 +72,7 @@ export class ClientsComponent {
 
   	this._clientService.cargarClientes( this.desde, this.hasta )
   		.subscribe( (resp: any) => {
-        console.log(resp.clientes);
+        
   			this.clientes = resp.clientes.filter(c => c.role === 'USER_ROLE' && c.deleted === false);
         this.totalRegistros = resp.total;
         this.cargando = false;

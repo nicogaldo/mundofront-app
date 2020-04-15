@@ -21,7 +21,7 @@ export class Homenajeado {
 	constructor (
 		public parent:string,
 		public nombre:string,
-		public apellido:string,
+		public apellido?:string,
 		public nacimiento?:string,
 		public genero?:string,
 		public colegio?:string,

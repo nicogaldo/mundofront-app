@@ -29,6 +29,7 @@
 								<tr>
 									<th scope="col">Nombre</th>
 									<th scope="col">Descripción</th>
+									<th scope="col">Colores</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -45,6 +46,11 @@
 									<tr (click)="verLugar( p._id )" *ngFor="let p of places" class="cursor-pointer">
 										<td>{{ p.name }}</td>
 										<td>{{ p.desc }}</td>
+										<td>
+											<span *ngIf="p.color1" [style.background]="p.color1.color_a" class="badge text-white text-uppercase p-2 mr-1">Turno Agendado</span>
+								    	<span *ngIf="p.color1" [style.background]="p.color1.color_b" class="badge text-white text-uppercase p-2 mr-1">Finalizado</span>
+								    	<span *ngIf="p.color1" [style.background]="p.color1.color_c" class="badge text-white text-uppercase p-2 mr-1">Cancelado</span>
+								    </td>
 									</tr>
 								</ng-container>
 								
@@ -60,7 +66,6 @@
 								<li (click)="setPage(pager.currentPage + 1)" [ngClass]="{disabled:pager.currentPage === pager.totalPages}" class="page-item"><a class="page-link">Siguiente</a></li>
 							</ul>
 						</nav>
-						
 						
 					</div>
 					<!-- /.widget-body -->
@@ -101,12 +106,25 @@
 				</div>
 				
 				<div class="col-lg-6">
-					
 					<div class="form-group">
 						<input formControlName="desc" class="form-control" type="text" id="desc" placeholder="Descripción">
 						<label for="desc">Descripción</label>
 					</div>
 				</div>
+				
+				<div class="col-lg-6">
+					<div class="form-group form-select">
+						<ng-select [items]="colors" bindValue="id" formControlName="color1">
+					    <ng-template ng-option-tmp ng-label-tmp let-item="item">
+					    	<span class="badge text-white text-uppercase p-2 mr-1" [style.background-color]="item.color_a">Turno Agendado</span>
+					    	<span class="badge text-white text-uppercase p-2 mr-1" [style.background-color]="item.color_b">Finalizado</span>
+					    	<span class="badge text-white text-uppercase p-2 mr-1" [style.background-color]="item.color_c">Cancelado</span>
+					    </ng-template>
+						</ng-select>
+						<label for="color1">Color en turnero</label>
+					</div>
+				</div>
+
 				<div class="col-lg-12">
 					<div class="text-right">
 						<button [disabled]="!forma.valid" class="btn btn-primary ripple" type="submit">Guardar</button>
@@ -159,6 +177,19 @@
 						<label for="desc">Descripción</label>
 					</div>
 				</div>
+
+				<div class="col-lg-6">
+					<div class="form-group form-select">
+						<ng-select [items]="colors" bindValue="id" formControlName="color1">
+					    <ng-template ng-option-tmp ng-label-tmp let-item="item">
+					    	<span class="badge text-white text-uppercase p-2 mr-1" [style.background-color]="item.color_a">Turno Agendado</span>
+					    	<span class="badge text-white text-uppercase p-2 mr-1" [style.background-color]="item.color_b">Finalizado</span>
+					    	<span class="badge text-white text-uppercase p-2 mr-1" [style.background-color]="item.color_c">Cancelado</span>
+					    </ng-template>
+						</ng-select>
+						<label for="color1">Color en turnero</label>
+					</div>
+				</div>
 				
 				<div class="col-lg-12 form-group mb-0">
 					
@@ -169,7 +200,7 @@
 						
 						<button *ngIf="isEdit" (click)="borrarLugar(editarLugarModal.getData())" class="btn btn-danger float-left" type="button"><i class="fas fa-fw fa-trash-alt mr-1"></i> Eliminar Lugar</button>
 						
-						<button *ngIf="isEdit" (click)="isEdit = !isEdit;editarLugar()" class="btn btn-secondary mr-2" type="button"><i class="fas fa-fw fa-times mr-1"></i> Cancelar</button>
+						<button *ngIf="isEdit" (click)="isEdit = !isEdit;editarLugar()" class="btn btn-secondary mr-1" type="button"><i class="fas fa-fw fa-times mr-1"></i> Cancelar</button>
 						
 						<button *ngIf="isEdit" [disabled]="!formaEdit.valid" class="btn btn-success ripple" type="submit">Guardar</button>
 					</div>

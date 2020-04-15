@@ -125,7 +125,6 @@
 
       initScrollbar: function(el) {
 
-        //console.log('initScrollbar');
         var ps = new PerfectScrollbar(el, el.dataset);
 
         if ( el.unifato === undefined )
@@ -160,7 +159,7 @@
 
       setMenu: function(){
 
-        ////console.log('setMenu');
+       //console.log('setMenu');
 
         var self = this;
         var width = window.innerWidth > 0 ? window.innerWidth:screen.width;
@@ -202,7 +201,7 @@
 
       sidebarToggle: function() {
 
-        ////console.log('sidebarToggle');
+        //console.log('sidebarToggle');
 
         var self = this;
         $(".sidebar-toggle a").on("click",function(){
@@ -210,7 +209,7 @@
   				var $body = $("body");
 
           var sidebarScrollbar = $('.site-sidebar.scrollbar-enabled')[0];
-          ////console.log(sidebarScrollbar);
+          //console.log(sidebarScrollbar);
 
           if( sidebarScrollbar !== undefined && sidebarScrollbar.classList.contains('ps') ) {
             sidebarScrollbar.unifato.perfectScrollbar.destroy();
@@ -1680,6 +1679,7 @@
       Unifato.setMenu();
     });
 
+    window.addEventListener('load', Unifato.setMenu);
     window.addEventListener('resize', Unifato.setMenu);
     window.addEventListener('resize', Unifato.contentHeight);
   })(jQuery);

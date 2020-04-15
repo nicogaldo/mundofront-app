@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Usuario, Place } from '../../models/index.model';
 import { URL_SERVICIOS } from '../../config/config';
+import { Usuario, Place } from '../../models/index.model';
+import { UsuarioService } from '../usuario/usuario.service';
 
 import { map } from 'rxjs/operators';
 import swal from 'sweetalert2';
@@ -17,32 +18,18 @@ export class PlaceService {
   token: string;
 
   constructor(
-    public http: HttpClient
-  ) {
-    this.cargarStorage();
-  }
-
-  cargarStorage() {
-
-    if (localStorage.getItem('token')) {
-      this.token = localStorage.getItem('token');
-      this.usuario = JSON.parse(localStorage.getItem('usuario'));
-
-    } else {
-      this.token = '';
-      this.usuario = null;
-
-    }
-  }
+    public http: HttpClient,
+    public _usuarioService: UsuarioService,
+  ) { }
 
   cargarPlaces( desde: number = 0, hasta: number = 5  ) {
 
-    let url = URL_SERVICIOS + '/place?desde=' + desde + '&hasta=' + hasta + '&token=' + this.token;
+    let url = URL_SERVICIOS + '/place?desde=' + desde + '&hasta=' + hasta + '&token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
   crearPlace(place: Place) {
-    let url = URL_SERVICIOS + '/place?token=' + this.token;
+    let url = URL_SERVICIOS + '/place?token=' + this._usuarioService.token;
     return this.http.post(url, place).pipe(
       map((resp: any) => {
 
@@ -61,7 +48,7 @@ export class PlaceService {
   actualizarPlace(place: Place) {
 
     let url = URL_SERVICIOS + '/place/' + place._id;
-    url += '?token=' + this.token;
+    url += '?token=' + this._usuarioService.token;
 
     return this.http.put(url, place).pipe(
       map((resp: any) => {
@@ -88,7 +75,7 @@ export class PlaceService {
 
   borrarPlace( id: string ) {
 
-    let url = URL_SERVICIOS + '/place/' + id + '?token=' + this.token;
+    let url = URL_SERVICIOS + '/place/' + id + '?token=' + this._usuarioService.token;
 
     return this.http.delete( url ).pipe(
       map( resp => {

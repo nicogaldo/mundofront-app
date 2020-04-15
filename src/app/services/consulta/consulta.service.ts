@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Usuario, Consulta } from '../../models/index.model';
 import { URL_SERVICIOS } from '../../config/config';
+import { Usuario, Consulta } from '../../models/index.model';
+import { UsuarioService } from '../usuario/usuario.service';
 
 import { map } from 'rxjs/operators';
 import swal from 'sweetalert2';
@@ -17,37 +18,30 @@ export class ConsultaService {
   token: string;
 
   constructor(
-    public http: HttpClient
-  ) {
-    this.cargarStorage();
-  }
-
-  cargarStorage() {
-
-    if (localStorage.getItem('token')) {
-      this.token = localStorage.getItem('token');
-      this.usuario = JSON.parse(localStorage.getItem('usuario'));
-
-    } else {
-      this.token = '';
-      this.usuario = null;
-
-    }
-  }
+    public http: HttpClient,
+    public _usuarioService: UsuarioService,
+  ) { }
 
   /*=================================
   =              Stats              =
   =================================*/
   cargarTotal() {
     let url = URL_SERVICIOS + '/consulta/get/total';
-    url += '?token=' + this.token;
+    url += '?token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
-  cargarRango( mes, anio, tipo = 'consultas' ) {
-    let url = URL_SERVICIOS + '/consulta/' + mes + '/' + anio + '?tipo=' + tipo ;
-    url += '?token=' + this.token;
-    return this.http.get(url); 
+  cargarAno( anio, tipo = 'consultas' ) {
+    let url = URL_SERVICIOS + '/consulta/ano/' + anio + '?tipo=' + tipo ;
+    url += '&token=' + this._usuarioService.token;
+    return this.http.get(url);
+  }
+
+  cargarRango( desde, hasta, tipo = 'consultas' ) {
+    let url = URL_SERVICIOS + '/consulta/' + desde + '/' + hasta + '?tipo=' + tipo ;
+    url += '&token=' + this._usuarioService.token;
+    console.log('url', url);
+    return this.http.get(url);
   }
 
   /*=================================
@@ -55,12 +49,12 @@ export class ConsultaService {
   =================================*/
   cargarConsultas( desde: number = 0, hasta: number = 5  ) {
 
-    let url = URL_SERVICIOS + '/consulta?desde=' + desde + '&hasta=' + hasta + '&token=' + this.token;
+    let url = URL_SERVICIOS + '/consulta?desde=' + desde + '&hasta=' + hasta + '&token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
   crearConsulta(consulta: Consulta) {
-    let url = URL_SERVICIOS + '/consulta?token=' + this.token;
+    let url = URL_SERVICIOS + '/consulta?token=' + this._usuarioService.token;
     return this.http.post(url, consulta).pipe(
       map((resp: any) => { return resp.consulta })
     )
@@ -69,18 +63,18 @@ export class ConsultaService {
   actualizarConsulta(consulta: Consulta) {
 
     let url = URL_SERVICIOS + '/consulta/' + consulta._id;
-    url += '?token=' + this.token;
+    url += '?token=' + this._usuarioService.token;
 
     return this.http.put(url, consulta).pipe(
       map((resp: any) => {
 
-        swal({
+        /*swal({
           type: 'success',
           title: '¡Consulta actualizada!',
           text: '',
           showConfirmButton: false,
           timer: 2000
-        });
+        });*/
         return true;
       })
     )
@@ -95,7 +89,7 @@ export class ConsultaService {
 
   borrarConsulta( id: string ) {
 
-    let url = URL_SERVICIOS + '/consulta/' + id + '?token=' + this.token;
+    let url = URL_SERVICIOS + '/consulta/' + id + '?token=' + this._usuarioService.token;
 
     return this.http.delete( url ).pipe(
       map( (resp: any) => {
@@ -114,21 +108,21 @@ export class ConsultaService {
   /*==============================
   =            Turnos            =
   ==============================*/
-  cargarTurnosLugar( id ) {
-    let url = URL_SERVICIOS + '/consulta/place/' + id;
-    url += '?token=' + this.token;
+  cargarTurnosLugar( id, desc = '' ) {
+    let url = URL_SERVICIOS + '/consulta/place/' + id + '/' + desc;
+    url += '?token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
   cargarTurnosRango( desde, hasta ) {
     let url = URL_SERVICIOS + '/consulta/solo/turnos?desde=' + desde + '&hasta=' + hasta;
-    url += '&token=' + this.token;
+    url += '&token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
   cargarTurnosFecha( fecha, salon = '' ) {
     let url = URL_SERVICIOS + '/consulta/' + fecha.day + '/'+ fecha.month + '/' + fecha.year + '?place=' + salon;
-    url += '&token=' + this.token;
+    url += '&token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 

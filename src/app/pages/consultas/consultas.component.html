@@ -32,7 +32,7 @@
 									<th scope="col">Lugar</th>
 									<th scope="col" title="¿Cómo nos conoció?">¿Cómo ...</th>
 									<th scope="col" title="Medio de contacto">Medio</th>
-									<th scope="col">Reserva</th>
+									<!-- <th scope="col">Reserva</th> -->
 									<th scope="col">Atendió</th>
 									<th class="text-right">Fecha</th>
 								</tr>
@@ -56,7 +56,7 @@
 										<td>{{ c.como_c }}</td>
 										<td>{{ c.medio_c }}</td>
 										
-										<td>
+										<!-- <td>
 											<span *ngIf="!c.date_t">
 												<i class="far fa-calendar-times text-danger"></i> Sin reserva
 											</span>
@@ -64,7 +64,7 @@
 											<span *ngIf="c.date_t">
 												<i class="far fa-calendar-check text-success"></i> {{ c.date_t | amLocale:'es' | amFromUtc |  amDateFormat:'DD/MM/YY' }} <small>en <strong>{{ c.place_t.name }}</strong> turno <strong>{{ c.turno_t.name }}</strong></small>
 											</span>
-										</td>
+										</td> -->
 										
 										<td>{{ c.usuario.nombre }}</td>
 										<td class="text-nowrap text-right"> {{ c.createdAt | amLocale:'es' | amFromUtc | amDateFormat:'DD/MM [-] HH:mm' }} </td>
@@ -84,7 +84,6 @@
 								<li (click)="setPage(pager.currentPage + 1)" [ngClass]="{disabled:pager.currentPage === pager.totalPages}" class="page-item"><a class="page-link">Siguiente</a></li>
 							</ul>
 						</nav>
-						
 						
 					</div>
 					<!-- /.widget-body -->
@@ -225,7 +224,7 @@
 				
 				<div class="col-lg-6">
 					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('consulta.place_c').errors?.required && forma.get('consulta.place_c').touched }">
-						<ng-select [items]="places"
+						<ng-select [items]="places_c"
 							[selectOnTab]="true"
 							bindValue="_id"
 							bindLabel="name"
@@ -248,7 +247,7 @@
 						<!-- <input formControlName="consulta.date_c" id="consulta.date_c" name="consulta.date_c" class="form-control" type="date"> -->
 						<div class="input-group">
 							<input class="form-control" placeholder="DD/MM/YYYY"
-							name="dp" formControlName="date_c" ngbDatepicker #d_c="ngbDatepicker" [minDate]="today" [markDisabled]="isDisabled">
+							name="dp" formControlName="date_c" ngbDatepicker #d_c="ngbDatepicker" (click)="d_c.toggle()" [minDate]="today">
 							<div class="input-group-append">
 								<button class="btn btn-outline-inverse border-bottom text-gray" (click)="d_c.toggle()" type="button"> <i class="fa fa-calendar"></i> </button>
 							</div>
@@ -288,7 +287,7 @@
 	</div>
 </ngx-smart-modal>
 
-<ngx-smart-modal #nuevoTurnoModal (onAnyCloseEvent)="formaTurno.reset()" identifier="nuevoTurnoModal" [closable]="false">
+<ngx-smart-modal #nuevoTurnoModal (onAnyCloseEvent)="formaTurno.reset()" identifier="nuevoTurnoModal" [closable]="false" [dismissable]="false">
 	
 	<div class="modal-header px-0 pt-0 pb-2 m-0">
 		<h6 class="modal-title">Agendar Turno <span *ngIf="nuevoTurnoModal.hasData()">a {{ nuevoTurnoModal.getData().client_c.nombre }} {{ nuevoTurnoModal.getData().client_c.apellido }}</span></h6>
@@ -315,10 +314,10 @@
 					<div class="form-group form-select">
 						<!-- <input formControlName="date_t" id="date_t" name="date_t" class="form-control" type="date"> -->
 						<div class="input-group">
-							<input (change)="formaTurno.get('place_t').reset()" class="form-control" placeholder="DD/MM/YYYY"
-							name="dp" formControlName="date_t" ngbDatepicker #d="ngbDatepicker" [minDate]="today" [markDisabled]="isDisabled">
+							<input (change)="formaTurno.get('place_t').reset()" (click)="d.toggle();formaTurno.get('place_t').reset()" class="form-control" placeholder="DD/MM/YYYY"
+							name="dp" formControlName="date_t" ngbDatepicker #d="ngbDatepicker" [minDate]="today">
 							<div class="input-group-append">
-								<button class="btn btn-outline-inverse border-bottom text-gray" (click)="d.toggle()" type="button"> <i class="fa fa-calendar"></i> </button>
+								<button class="btn btn-outline-inverse border-bottom text-gray" (click)="d.toggle();formaTurno.get('place_t').reset()" type="button"> <i class="fa fa-calendar"></i> </button>
 							</div>
 						</div>
 						<label for="date_t">Día <span class="text-danger">*</span></label>
@@ -327,7 +326,7 @@
 				
 				<div class="col-lg-6">
 					<div class="form-group form-select" [ngClass]="{'has-danger': formaTurno.get('place_t').errors?.required && formaTurno.get('place_t').touched }">
-						<ng-select [items]="places"
+						<ng-select [items]="places_t"
 							(change)="formaTurno.get('turno_t').reset()"
 							[selectOnTab]="true"
 							[loading]="cargandoP"
@@ -337,6 +336,11 @@
 							formControlName="place_t"
 							class="p-0"
 							id="place_t">
+
+							<ng-template ng-option-tmp ng-label-tmp let-item="item">
+								{{ item.name }}
+							</ng-template>
+
 						</ng-select>
 						<label for="place_t">Seleccionar Lugar <span class="text-danger">*</span></label>
 						
@@ -397,14 +401,15 @@
 						<div *ngIf="formaTurno.get('sena_t').errors?.required && formaTurno.get('sena_t').touched" class="small text-danger">
 							Este campo es requerido
 						</div>
+						<div class="small text-primary">
+							Revisa bien el monto, no podrás modificarlo luego.
+						</div>
 					</div>
-					
-					
 				</div>
 				
-				<div class="col-md-6 col-lg-3">
+				<!-- <div class="col-md-6 col-lg-3">
 					<div class="form-group form-select" [ngClass]="{'has-danger': formaTurno.get('sena_m').errors?.required && formaTurno.get('sena_m').touched }">
-						<!-- <input formControlName="sena_m" id="sena_m" name="sena_m" class="form-control" type="number"> -->
+						<1!-- <input formControlName="sena_m" id="sena_m" name="sena_m" class="form-control" type="number"> --1>
 						<ng-select
 							[selectOnTab]="true"
 							notFoundText="No se encontraron resultados"
@@ -422,8 +427,61 @@
 							Este campo es requerido
 						</div>
 					</div>
-					
+				</div> -->
+
+				<div class="col-lg-3">
+					<div class="form-group form-select" [ngClass]="{'has-danger': formaTurno.get('sena_m').errors?.required && formaTurno.get('sena_m').touched }">
+						<ng-select
+							[selectOnTab]="true"
+							notFoundText="No se encontraron resultados"
+							formControlName="sena_m"
+							name="sena_m"
+							class="p-0">
+							<ng-option value="Efectivo">Efectivo</ng-option>
+							<ng-option value="Tarjeta">Tarjeta</ng-option>
+							<ng-option value="Transferencia">Transferencia</ng-option>
+						</ng-select>
+						<label for="sena_m">Seña Medio de pago <span class="text-danger">*</span></label>
+						
+						<div *ngIf="formaTurno.get('sena_m').errors?.required && formaTurno.get('sena_m').touched" class="small text-danger">
+							Este campo es requerido
+						</div>
+					</div>
 				</div>
+				
+				<ng-container *ngIf="formaTurno.value.sena_m == 'Tarjeta'">
+					
+					<div class="col-lg-3">
+						<div class="form-group form-select">
+							<ng-select
+								[selectOnTab]="true"
+								notFoundText="No se encontraron resultados"
+								formControlName="t_tipo"
+								name="t_tipo"
+								class="p-0">
+								<ng-option value="Débito">Débito</ng-option>
+								<ng-option value="Crédito">Crédito</ng-option>
+							</ng-select>
+							<label for="t_tipo">Tipo <span class="text-danger">*</span></label>
+						</div>
+					</div>
+
+					<div class="col-lg-3">
+						<div class="form-group form-select">
+							<ng-select
+								[selectOnTab]="true"
+								notFoundText="No se encontraron resultados"
+								formControlName="t_marca"
+								name="t_marca"
+								class="p-0">
+								<ng-option value="Visa">Visa</ng-option>
+								<ng-option value="MasterCard">MasterCard</ng-option>
+							</ng-select>
+							<label for="t_marca">Marca <span class="text-danger">*</span></label>
+						</div>
+					</div>
+					
+				</ng-container>
 				
 				<div class="col-lg-6">
 					<div class="form-group">

@@ -4,6 +4,10 @@ body {
     height: 100%;
 }
 
+[role=button] {
+    cursor: pointer;
+}
+
 /*==============================
 =            Modals            =
 ==============================*/
@@ -23,11 +27,88 @@ form .has-danger {
     }
 }
 
-/*==================================
-=            DatePicker            =
-==================================*/
-.ngb-dp-week .ngb-dp-day > div {
-    color: #999;
+/*========================================
+=            Datepicker range            =
+========================================*/
+.custom-day {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    padding: .185rem .25rem;
+
+    transition: all .15s ease-in-out;
+    text-align: center;
+
+    color: #a5a5a5;
+}
+
+.custom-day.focused {
+    background-color: #e6e6e6;
+}
+
+.custom-day.range,
+.custom-day:hover {
+    color: white;
+    background-color: #005fc5;
+}
+
+.custom-day.faded {
+    background-color: rgba(0, 95, 197, .57);
+}
+
+ngb-datepicker {
+    border: none;
+}
+
+.ngb-dp-weekday {
+    font-style: normal !important;
+}
+
+.ngb-dp-months {
+    padding: 0 !important;
+}
+
+.ngb-dp-month-name {
+    color: #31c6f1;
+}
+
+.date-range-quick-options ul {
+    display: table;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+
+    list-style: none;
+
+    text-align: center;
+
+    border-bottom: 1px solid #dadada;
+}
+
+.date-range-quick-options ul li {
+    display: table-cell;
+    padding: 8px 10px;
+
+    font-size: 12px;
+
+    cursor: pointer;
+    transition: all .2s linear;
+
+    border-right: 1px solid #dadada;
+    background-color: #f8f9fa;
+}
+
+.date-range-quick-options ul li:last-child {
+    border-right: none;
+}
+
+.date-range-quick-options ul li:hover {
+    color: #fff;
+    background-color: green;
+}
+
+[ngbDatepickerDayView] {
+    color: #1976d2!important;
 }
 
 /*=================================
@@ -61,12 +142,18 @@ form .has-danger {
 
     .ng-select-disabled {
         .ng-select-container {
-            .ng-value-container .ng-value {
-                color: #333;
+            .ng-value {
+                cursor: not-allowed;
+
+                color: rgba(153, 153, 153, .5);
+            }
+
+            .ng-input > input {
+                cursor: not-allowed;
             }
 
             &:after {
-                border-bottom: 0!important;
+                /*border-bottom: 0!important;*/
             }
         }
     }
@@ -83,8 +170,12 @@ form .has-danger {
 /*====================================
 =            FullCalendar            =
 ====================================*/
+.fc-toolbar.fc-header-toolbar {
+    margin-bottom: 0 !important;
+}
+
 .fc-view-container {
-    min-width: 100%!important;
+    min-width: 100% !important;
 }
 
 .fc-event,
@@ -92,16 +183,56 @@ form .has-danger {
     cursor: pointer;
 }
 
-.fc-event.cancel .fc-title,
-.fc-event.cancel .fc-time,
+.fc-event.cancel {
+    .fc-title,
+    .fc-time {
+        text-decoration: line-through;
+    }
+}
+
 .fc-list-item.cancel > * {
     text-decoration: line-through;
+}
+
+.fc-other-month {
+    background-image: repeating-linear-gradient(45deg, rgba(238, 241, 242, .5), rgba(238, 241, 242, .5) 8px, transparent 8px, transparent 16px) !important;
+}
+
+.fc-button-primary:not(:disabled) {
+    &:active,
+    &.fc-button-active {
+        color: white !important;
+        background-color: #1976d2;
+    }
+}
+
+.custom-fullcalendar .fc-toolbar .fc-button {
+    color: #1976d2;
+    border: 2px solid #1976d2;
+}
+
+.fc-button-primary:not(:disabled) {
+    &:active:focus,
+    &.fc-button-active:focus {
+        box-shadow: 0 0 0 .2rem rgba(95, 175, 255, .5) !important;
+    }
+}
+
+.custom-fullcalendar .fc-toolbar {
+    .fc-prev-button,
+    .fc-next-button {
+        &::after {
+            color: #1976d2;
+        }
+        &:active:after {
+            color: white;
+        }
+    }
 }
 
 /*==================================
 =            DataTables            =
 ==================================*/
-
 .dataTables_wrapper {
     .dt-buttons {
         float: right;

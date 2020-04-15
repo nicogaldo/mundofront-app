@@ -9,12 +9,12 @@ import swal from 'sweetalert2';
 import * as moment from 'moment';
 
 @Component({
-  selector: 'app-horarios',
-  templateUrl: './horarios.component.html',
+  selector: 'app-payments',
+  templateUrl: './payments.component.html',
   styles: []
 })
-export class HorariosComponent implements OnInit {
-
+export class PaymentsComponent implements OnInit {
+	
   forma: FormGroup;
   formaEdit: FormGroup;
   formaHorarioEdit: FormGroup;

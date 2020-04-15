@@ -29,6 +29,43 @@ export class PlacesComponent implements OnInit {
   totalRegistros: number = 0;
   cargando: boolean = true;
 
+  colors = [{
+    id: 1,
+    color_a: '#ef5350',
+    color_b: '#EC407A',
+    color_c: '#ef9a9a',
+  },{
+    id: 2,
+    color_a: '#AB47BC',
+    color_b: '#7E57C2',
+    color_c: '#CE93D8',
+  },{
+    id: 3,
+    color_a: '#5C6BC0',
+    color_b: '#42A5F5',
+    color_c: '#9FA8DA',
+  },{
+    id: 4,
+    color_a: '#29B6F6',
+    color_b: '#26C6DA',
+    color_c: '#81D4FA',
+  },{
+    id: 5,
+    color_a: '#26A69A',
+    color_b: '#66BB6A',
+    color_c: '#80CBC4',
+  },{
+    id: 6,
+    color_a: '#9CCC65',
+    color_b: '#D4E157',
+    color_c: '#C5E1A5',
+  },{
+    id: 7,
+    color_a: '#FFA726',
+    color_b: '#FF7043',
+    color_c: '#FFCC80',
+  }]
+
   constructor(
 		public _usuarioService: UsuarioService,
 		public _placeService: PlaceService,
@@ -39,12 +76,14 @@ export class PlacesComponent implements OnInit {
     this.forma = new FormGroup({
       'name': new FormControl( null, Validators.required ),
       'desc': new FormControl( null ),
+      'color1': new FormControl( null ),
     })
 
     this.formaEdit = new FormGroup({
       '_id': new FormControl( null, Validators.required ),
       'name': new FormControl( null, Validators.required ),
       'desc': new FormControl( null ),
+      'color1': new FormControl( null ),
     })
   }
 
@@ -61,9 +100,9 @@ export class PlacesComponent implements OnInit {
   	this._placeService.cargarPlaces( this.desde, this.hasta )
   		.subscribe( (resp: any) => {
   			this.places = resp.places.filter(p => !p.deleted);
+
         this.totalRegistros = resp.total;
         this.cargando = false;
-
         this.setPage(1);
   		})
   }
@@ -85,6 +124,13 @@ export class PlacesComponent implements OnInit {
 	    this._placeService.cargarPlaces( this.desde, this.hasta )
 	  		.subscribe( (resp: any) => {
 	  			this.places = resp.places.filter(p => !p.deleted);
+
+          this.places.map( p => {
+            if (p.color1) {
+              p.color1 = this.colors.find(c => c.id == p.color1)
+            }
+          })
+
 	        this.cargando = false;
 	  		});
     }    
@@ -124,6 +170,7 @@ export class PlacesComponent implements OnInit {
   	let lugar: Place = {
   		name: this.forma.value.name,
   		desc: this.forma.value.desc,
+      color1: this.forma.value.color1,
   	}
     
     this._placeService.crearPlace( lugar )
@@ -143,10 +190,19 @@ export class PlacesComponent implements OnInit {
     this.isEdit = false;
 
     let place = this.places.find( p => p._id === id);
+    let mycolor: any;
+
+    if (place.color1) {
+      mycolor = place.color1.id;
+    } else {
+      mycolor = null;
+    }
+
     this.formaEdit.patchValue({
       _id: place._id,
       name: place.name,
       desc: place.desc,
+      color1: mycolor
     });
 
     this.ngxSmartModalService.setModalData(place, 'editarLugarModal');
@@ -154,6 +210,7 @@ export class PlacesComponent implements OnInit {
     this.formaEdit.get('_id').disable();
     this.formaEdit.get('name').disable();
     this.formaEdit.get('desc').disable();
+    this.formaEdit.get('color1').disable();
   }
 
   editarLugar() {
@@ -163,12 +220,14 @@ export class PlacesComponent implements OnInit {
       this.formaEdit.get('_id').enable();
       this.formaEdit.get('name').enable();
       this.formaEdit.get('desc').enable();
+      this.formaEdit.get('color1').enable();
 
     } else {
       this.titleModal = "Viendo Lugar";
       this.formaEdit.get('_id').disable();
       this.formaEdit.get('name').disable();
       this.formaEdit.get('desc').disable();
+      this.formaEdit.get('color1').disable();
     }
   }
 

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { URL_SERVICIOS } from '../../config/config';
-import { Usuario, Combo } from '../../models/index.model';
+import { Usuario, Caja } from '../../models/index.model';
 import { UsuarioService } from '../usuario/usuario.service';
 
 import { map } from 'rxjs/operators';
@@ -11,10 +11,10 @@ import swal from 'sweetalert2';
 @Injectable({
   providedIn: 'root'
 })
-export class ComboService {
+export class CajaService {
 
   usuario: Usuario;
-  combo: Combo;
+  caja: Caja;
   token: string;
 
   constructor(
@@ -22,46 +22,46 @@ export class ComboService {
     public _usuarioService: UsuarioService,
   ) { }
 
-  cargarCombos( desde: number = 0, hasta: number = 5  ) {
-    let url = URL_SERVICIOS + '/combo?desde=' + desde + '&hasta=' + hasta;
+  cargarMovimientos( desde: number = 0, hasta: number = 5  ) {
+    let url = URL_SERVICIOS + '/caja?desde=' + desde + '&hasta=' + hasta;
     url += '&token=' + this._usuarioService.token;
     return this.http.get(url);
   }
 
-  cargarPlacesCombos( id ) {
-    let url = URL_SERVICIOS + '/combo/places/' + id;
-    url += '?token=' + this._usuarioService.token;
+  cargarMovimientosConsulta( id ) {
+    let url = URL_SERVICIOS + '/caja/consulta/' + id;
     return this.http.get(url);
   }
 
-  crearCombo(combo: Combo) {
-    let url = URL_SERVICIOS + '/combo?token=' + this._usuarioService.token;
-    return this.http.post(url, combo).pipe(
-      map((resp: any) => {
-
-        swal({
-          type: 'success',
-          title: '¡Combo creado!',
-          text: '',
-          showConfirmButton: false,
-          timer: 2000
-        });
-        return resp.combo;
-      })
-    )
-  }
-
-  actualizarCombo(combo: Combo) {
-
-    let url = URL_SERVICIOS + '/combo/' + combo._id;
-    url += '?token=' + this._usuarioService.token;
-
-    return this.http.put(url, combo).pipe(
+  crearMovimiento(caja: Caja) {
+    let url = URL_SERVICIOS + '/caja?token=' + this._usuarioService.token;
+    return this.http.post(url, caja).pipe(
       map((resp: any) => {
 
         /*swal({
           type: 'success',
-          title: '¡Combo actualizado!',
+          title: '¡Movimiento creado!',
+          text: '',
+          showConfirmButton: false,
+          timer: 2000
+        });*/
+        return resp.caja;
+        //return true;
+      })
+    )
+  }
+
+  actualizarMovimiento(caja: Caja) {
+
+    let url = URL_SERVICIOS + '/caja/' + caja._id;
+    url += '?token=' + this._usuarioService.token;
+
+    return this.http.put(url, caja).pipe(
+      map((resp: any) => {
+
+        /*swal({
+          type: 'success',
+          title: '¡Movimiento actualizado!',
           text: '',
           showConfirmButton: false,
           timer: 2000
@@ -71,21 +71,21 @@ export class ComboService {
     )
   }
 
-  buscarCombos( termino: string ) {
-    let url = URL_SERVICIOS + '/search/coleccion/combo/' + termino;
+  /*buscarMovimientos( termino: string ) {
+    let url = URL_SERVICIOS + '/search/coleccion/caja/' + termino;
     return this.http.get( url ).pipe(
-			map( (resp: any) => resp.combo)
+			map( (resp: any) => resp.caja)
     )
   }
 
-  borrarCombo( id: string ) {
+  borrarMovimiento( id: string ) {
 
-    let url = URL_SERVICIOS + '/combo/' + id + '?token=' + this._usuarioService.token;
+    let url = URL_SERVICIOS + '/caja/' + id + '?token=' + this._usuarioService.token;
     return this.http.delete( url ).pipe(
       map( resp => {
         swal({
           type: 'success',
-          title: 'Comboo borrado',
+          title: 'Movimientoo borrado',
           text: 'El lugar se ha eliminado correctamente',
           showConfirmButton: false,
           timer: 2000
@@ -93,6 +93,6 @@ export class ComboService {
         return true;
       })
     )
-  }
+  }*/
 
 }

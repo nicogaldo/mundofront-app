@@ -4,7 +4,7 @@
 
             <div class="col-lg-12 mb-2">
                 <div class="card">
-                    <h5 class="px-2">Turnos de hoy, {{ hoy | amDateFormat:'LL' }}</h5>
+                    <h5 class="px-2">Eventos de hoy, <span class="badge badge-primary">{{ hoy | amDateFormat:'LL' }}</span></h5>
                     <table class="table table-sm table-striped">
                         <thead>
                             <tr>
@@ -23,7 +23,7 @@
                             </tr>
                             
                             <tr *ngIf="turnosHoy.length === 0 && !cargandoH" role="row" class="text-center">
-                                <td colspan="6"><i class="far fa-meh fa-2x"></i> No se encontraron resultados</td>
+                                <td colspan="6"><i class="far fa-meh fa-2x"></i> Hoy no hay eventos</td>
                             </tr>
 
                             <tr *ngFor="let t of turnosHoy">
@@ -37,6 +37,10 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <div class="col-lg-12 mb-2">
+                <hr>
             </div>
 
             <div class="widget-holder col-md-12">
@@ -128,10 +132,10 @@
                     
                     <div class="row">
                                    
-                        <div class="col-lg-6 mb-2">
+                        <div class="col-lg-4 mb-2">
                             <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Contactos <span class="badge badge-info">{{ consultasMes }}</span></h6>
+                                <div class="card-body px-1">
+                                    <h6 class="card-title px-3">Contactos <span class="badge badge-info">{{ consultasMes }}</span></h6>
                                     <canvas baseChart
                                     *ngIf="consultasChartData.length > 0"
                                     [data]="consultasChartData"
@@ -150,10 +154,10 @@
                             </div>
                         </div>
                         
-                        <div class="col-lg-6 mb-2">
+                        <div class="col-lg-4 mb-2">
                             <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">Medio de contacto</h6>
+                                <div class="card-body px-1">
+                                    <h6 class="card-title px-3">Medio de contacto</h6>
                                     <canvas baseChart
                                     *ngIf="mediosChartData.length > 0"
                                     [data]="mediosChartData"
@@ -172,10 +176,10 @@
                             </div>
                         </div>
                         
-                        <div class="col-lg-6 mb-2">
+                        <div class="col-lg-4 mb-2">
                             <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">¿Cómo nos conoció?</h6>
+                                <div class="card-body px-1">
+                                    <h6 class="card-title px-3">¿Cómo nos conoció?</h6>
                                     <canvas baseChart
                                     *ngIf="comoChartData.length > 0"
                                     [data]="comoChartData"

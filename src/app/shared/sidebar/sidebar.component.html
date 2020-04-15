@@ -29,10 +29,16 @@
 			</a>
 			<ul class="list-unstyled sub-menu">
 				
-				<li *ngFor="let submenu of menu.submenu">
-					<a routerLinkActive="active" [routerLink]="[ submenu.url ]"> {{ submenu.titulo }} </a>
+				<li *ngFor="let m of menu.submenu" [ngClass]="{'menu-item-has-children': m.submenu}">
+					<a routerLinkActive="active" [routerLink]="[ m.url ]"> {{ m.titulo }} </a>
+
+          <ul *ngIf="m.submenu" class="list-unstyled sub-menu collapse">
+            <li *ngFor="let sm of m.submenu">
+							<a routerLinkActive="active" [routerLink]="[ sm.url ]"> {{ sm.titulo }} </a>
+            </li>
+          </ul>
+
 				</li>
-				
 				<!-- <li><a href="index2.html">Analytical</a></li>
 				<li><a href="index3.html">Demographical</a></li>
 				<li><a href="index4.html">Modern</a></li> -->

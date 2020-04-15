@@ -4,24 +4,42 @@
 			<div class="widget-holder col-md-12">
 				<div class="widget-bg">
 					<div class="widget-heading widget-heading-border">
-						<h6 class="mb-0 mr-auto">Turnos Próximos ({{ totalRegistros }})</h6>
+						<h6 class="mb-0 mr-auto">Turnos de {{ currentMonth }} ({{ totalRegistros }})</h6>
 						<!-- <button (click)="nuevoTurno()" class="btn btn-primary text-uppercase">Nuevo Turno</button> -->
+
+						<div *ngIf="proxTurnos" class="d-flex">
+							<span *ngFor="let t of proxTurnos" class="mr-2 small" [ngClass]="{'text-dark order-5': t.prox, 'text-muted order-1': !t.prox }">
+								<i class="fas fa-fe fa-circle"></i> {{ t.prox ? 'Próximos' : 'Pasados' }} ({{ t.count }})
+							</span>
+						</div>
+
 					</div>
 					<!-- /.widget-heading -->
 					<div class="widget-body pt-2">
 						
-						<div *ngIf="usuario.role == 'ADMIN_ROLE' || usuario.role == 'MANAGER_ROLE'" class="btn-group d-block" role="group">
-							<ng-container *ngFor="let l of places">
-								<button [disabled]="cargando" (click)="cargarTurnos(l._id);selectedItem = l._id" [ngClass]="{'active': selectedItem === l._id}" class="btn btn-outline-default mt-1" role="button"> {{ l.name }} </button>
+						<div *ngIf="usuario.role == 'ADMIN_ROLE' || usuario.role == 'MANAGER_ROLE'" class="btn-group d-block mb-3" role="group">
+							<ng-container *ngFor="let l of places_c">
+								<button [disabled]="cargando" (click)="cargarTurnos(l._id);selectedItem = l._id" [ngClass]="{'active': selectedItem === l._id}" class="btn btn-outline-primary mt-1" role="button"> {{ l.name }} </button>
 							</ng-container>
 						</div>
 						
-						<div *ngIf="calendarOptions">
-							
+						<!-- <div *ngIf="calendarOptions">
 							<ng-fullcalendar #ucCalendar [options]="calendarOptions" [(eventsModel)]="events" (eventClick)="verTurno($event.detail)" class="custom-fullcalendar">
 							</ng-fullcalendar>
-							
+						</div> -->
+
+						<div *ngIf="cargando" class="cargandoCalendar h5 position-absolute text-center w-100">
+							<i class="fas fa-circle-notch fa-spin fa-2x"></i>
 						</div>
+
+						<full-calendar #calendar *ngIf="options"
+							[plugins]="options.plugins"
+							[defaultView]="options.defaultView"
+						  [events]="options.events"
+
+						  (eventClick)="verTurno($event)"
+							class="custom-fullcalendar">
+						</full-calendar>
 						
 					</div>
 					<!-- /.widget-body -->
@@ -54,13 +72,13 @@
 					<span *ngIf="vTm.getData().client_c.telefono"><i class="fas fa-fw fa-phone"></i>&nbsp;{{ vTm.getData().client_c.telefono }}<br></span>
 					<span *ngIf="vTm.getData().client_c.email"><i class="fas fa-fw fa-envelope"></i>&nbsp;{{ vTm.getData().client_c.email }}<br></span>
 					<span><i class="fas fa-fw fa-child"></i>&nbsp;{{ vTm.getData().homenajeado_c.nombre }} {{ vTm.getData().homenajeado_c.apellido }} ({{ vTm.getData().homenajeado_c.nacimiento | age }})<br></span>
-					<span><i class="fas fa-fw fa-birthday-cake"></i>&nbsp;{{ vTm.getData().homenajeado_c.nacimiento | amLocale:'es' | amFromUtc | amDateFormat:'D MMMM [de ] YYYY' }}<br></span>
+					<span><i class="fas fa-fw fa-birthday-cake"></i>&nbsp;{{ vTm.getData().homenajeado_c.nacimiento | amLocale:'es' | amDateFormat:'D MMMM [de ] YYYY' }}<br></span>
 					<span *ngIf="vTm.getData().homenajeado_c.colegio"><i class="fas fa-fw fa-school"></i>&nbsp;{{ vTm.getData().homenajeado_c.colegio }}<br></span>
 				</div>
 				<div class="col-md-6 text-right">
 					<h6 class="mr-t-0">Antendió:</h6>
 					<span> {{ vTm.getData().usuario.nombre }}&nbsp;<i class="fas fa-fw fa-headset"></i></span>
-					<br><span> {{ vTm.getData().createrAt | amLocale:'es' | amFromUtc | amDateFormat:'DD/MM/YYYY HH:mm' }}&nbsp;<i class="far fa-fw fa-clock"></i></span>
+					<br><span> {{ vTm.getData().createdAt | amLocale:'es' | amDateFormat:'DD/MM/YYYY HH:mm' }}&nbsp;<i class="far fa-fw fa-clock"></i></span>
 					<ng-container *ngIf="vTm.getData().medio_c">
 						<br><span> {{ vTm.getData().medio_c }}&nbsp;<i class="fas fa-fw fa-share-alt"></i></span>
 						<br><span> {{ vTm.getData().como_c }}&nbsp;<i class="fas fa-fw fa-search"></i></span>
@@ -68,22 +86,117 @@
 				</div>
 			</div>
 			<!-- /.row -->
-			<hr class="border-dashed mb-0">
+			<hr class="border-dashed">
 			<div class="row">
-				<div *ngIf="vTm.getData().medio_c" class="col-md-12">
-					<h6>Consultó por:</h6>
+				<div *ngIf="vTm.getData().medio_c" class="col-12 col-lg-6">
+					<h6 class="my-0">Consultó por:</h6>
 					<span><i class="fas fa-fw fa-map-marker-alt"></i>&nbsp;Lugar: <strong>{{ vTm.getData().place_c.name }}</strong></span>
-					<br *ngIf="vTm.getData().date_c"><span *ngIf="vTm.getData().date_c"><i class="far fa-fw fa-calendar-alt"></i>&nbsp;Día: <strong>{{ vTm.getData().date_c | amFromUtc | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>
+					<br *ngIf="vTm.getData().date_c"><span *ngIf="vTm.getData().date_c"><i class="far fa-fw fa-calendar-alt"></i>&nbsp;Día: <strong>{{ vTm.getData().date_c | amFromUtc | amLocale:'es' |amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>
 					<br><span><i class="fas fa-fw fa-info-circle"></i>&nbsp;Detalles: <strong>{{ vTm.getData().detalles_c }}</strong></span>
 				</div>
-				<div *ngIf="vTm.getData().date_t" class="col-md-12">
-					<h6>Reserva:</h6>
-					<span><i class="far fa-fw fa-calendar-check"></i>&nbsp;Fecha: <strong>{{ vTm.getData().date_t | amLocale:'es' | amFromUtc | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>
+				<div *ngIf="vTm.getData().date_t" class="col-12 col-lg-6">
+					<h6 class="my-0">Reserva:</h6>
+					<span><i class="far fa-fw fa-calendar-check"></i>&nbsp;Fecha: <strong>{{ vTm.getData().date_t | amFromUtc | amLocale:'es' | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>
+					<br><span><i class="fas fa-fw fa-map-marker-alt"></i>&nbsp;Lugar: <strong>{{ vTm.getData().place_t.name }}</strong></span>
 					<br><span><i class="far fa-fw fa-clock"></i>&nbsp;Turno: <strong>{{ vTm.getData().turno_t.name }} {{ vTm.getData().turno_t.from }} - {{ vTm.getData().turno_t.to }}</strong></span>
 					<br><span><i class="fas fa-fw fa-check-double"></i>&nbsp;Combo: <strong>{{ vTm.getData().combo_t.name }}</strong></span>
 					<br><span><i class="fas fa-fw fa-info-circle"></i>&nbsp;Detalles: <strong>{{ vTm.getData().detalles_t }}</strong></span>
 				</div>
-				
+
+				<div *ngIf="vTm.getData().status === 'FINALIZADO'" class="col-12">
+					<hr class="border-dashed mb-0">
+
+					<table class="table table-sm table-hover">
+						<thead>
+							<tr>
+								<th>Producto</th>
+								<th>Descripción</th>
+								<th class="text-right" width="100px">Cantidad</th>
+								<th class="text-right">Subtotal</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>{{ vTm.getData().combo_t.name }}</td>
+								<td>{{ vTm.getData().combo_t.desc }}</td>
+								<td class="text-right"> 1 </td>
+								<td class="text-right">$ {{ vTm.getData().combo_t.price }}</td>
+							</tr>
+						</tbody>
+						<tbody *ngFor="let p of vTm.getData().pago">
+							<tr *ngFor="let e of p.extras">
+								<td> {{ e.name }} </td>
+								<td> {{ e.desc }} </td>
+								<td class="text-right"> {{ e.cant }} </td>
+								<td class="text-right">$ {{ e.total }} </td>
+							</tr>
+						</tbody>
+						<tbody *ngIf="formaFinalizar.value.extras">
+							<ng-container >
+								<tr *ngFor="let p of misExtras; let i = index">
+									<td>{{ p.name }}</td>
+									<td>{{ p.desc }}</td>
+									<td class="text-right">
+										<input (change)="changeTotal(p, $event.target.value, vTm.getData())" type="number" id="p._id" value="1" maxlength="2" min="1" class="form-control text-right py-0">
+									</td>
+									<td class="text-right">$ {{ p.total }}</td>
+								</tr>
+							</ng-container>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td></td>
+								<td></td>
+								<td class="text-right text-nowrap font-weight-bold">Total:</td>
+								<td class="text-right font-weight-bold">$ {{ sumaTotal }}</td>
+							</tr>
+						</tfoot>
+					</table>
+
+					<table *ngIf="vTm.getData().pago" class="table table-sm table-hover bg-facebook-contrast mb-0">
+						<thead>
+							<tr>
+								<th>Pagos realizados</th>
+								<th>Medio de pago</th>
+								<th>Descripción</th>
+								<th class="text-right">Monto</th>
+							</tr>
+						</thead>
+						<ng-container *ngFor="let p of vTm.getData().pago">
+							<tbody>
+								<tr data-toggle="collapse" [attr.data-target]="'#pago-'+p._id" class="accordion-toggle">
+									<td>{{ p.createdAt | amLocale:'es' | amDateFormat:'DD/MM/YYYY HH:mm' }}</td>
+									<td> {{ p.medio }} </td>
+									<td>
+										{{ p.detalles }}
+										<!-- <span role="button" class="small text-facebook" *ngIf="p.extras && p.extras.length">
+											<b>ver extras <i class="fas fa-angle-down fa-fw" title="Clic para ver más"></i></b>
+										</span> -->
+									</td>
+									<td class="text-right">$ {{ p.total }}</td>
+								</tr>
+							</tbody>
+							<!-- <ng-container class="small text-facebook" *ngIf="p.extras">
+								<tbody class="accordian-body collapse" id="pago-{{p._id}}">
+									<tr class="bg-facebook-light" *ngFor="let e of p.extras">
+										<td></td>
+										<td></td>
+										<td class="small text-black"> {{ e.name }} x{{ e.cant}}</td>
+										<td class="small text-right text-black">$ {{ e.total}} </td>
+									</tr>
+								</tbody>
+							</ng-container> -->
+						</ng-container>
+						<tfoot class="bg-blue-contrast text-black">
+							<tr>
+								<td></td>
+								<td></td>
+								<td class="text-right">Total</td>
+								<td class="text-right font-weight-bold">$ {{ finalizadoTotal }} </td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>				
 			</div>
 			
 			<hr class="">
@@ -94,12 +207,11 @@
 					
 					<button (click)="vTm.close()" class="btn btn-link d-flex float-right ml-2"><i class="fas fa-times"></i>&nbsp;Cerrar</button>
 					
-					
-					<button *ngIf="vTm.getData().status != 'FINALIZADO'" (click)="finalizarTurno(vTm.getData())" type="button" class="btn btn-success d-flex float-right ml-2"><i class="fas fa-cash-register"></i>&nbsp;Finalizar</button>
+					<button *ngIf="vTm.getData().status != 'FINALIZADO' && vTm.getData().status != 'CANCELADO'" (click)="finalizarTurno(vTm.getData())" type="button" class="btn btn-success d-flex float-right ml-2"><i class="fas fa-cash-register"></i>&nbsp;Finalizar</button>
 					
 					<button *ngIf="vTm.getData().status === 'FINALIZADO'" disabled type="button" class="btn btn-success d-flex float-right ml-2"><i class="fas fa-cash-register"></i>&nbsp;Finalizado</button>
 					
-					<button *ngIf="vTm.getData().status != 'FINALIZADO'" (click)="reprogramarTurno(vTm.getData())" type="button" class="btn btn-info d-flex float-right ml-2"><i class="fas fa-sync"></i>&nbsp;Reprogramar</button>
+					<button *ngIf="vTm.getData().status != 'FINALIZADO' && vTm.getData().status != 'CANCELADO'" (click)="reprogramarTurno(vTm.getData())" type="button" class="btn btn-info d-flex float-right ml-2"><i class="fas fa-sync"></i>&nbsp;Reprogramar</button>
 					
 				</div>
 				
@@ -109,7 +221,7 @@
 	</div>
 </ngx-smart-modal>
 
-<ngx-smart-modal #turnoModal (onAnyCloseEvent)="forma.reset()" identifier="turnoModal" [closable]="false">
+<ngx-smart-modal #turnoModal (onAnyCloseEvent)="forma.reset()" identifier="turnoModal" [closable]="false" [dismissable]="false">
 	
 	<div class="modal-header px-0 pt-0 pb-2 m-0">
 		<h6 class="modal-title"> {{ titleModal }} </h6>
@@ -187,10 +299,9 @@
 					<div class="form-group form-select">
 						<!-- <input formControlName="date_t" id="date_t" name="date_t" class="form-control" type="date"> -->
 						<div class="input-group">
-							<input (change)="forma.get('place_t').reset()" class="form-control" placeholder="DD/MM/YYYY"
-							name="dp" formControlName="date_t" ngbDatepicker #d="ngbDatepicker" [minDate]="today" [markDisabled]="isDisabled">
+							<input (click)="d.toggle();forma.get('place_t').reset()" #d="ngbDatepicker" ngbDatepicker formControlName="date_t" placeholder="DD/MM/YYYY" name="date_t" class="form-control">
 							<div class="input-group-append">
-								<button class="btn btn-outline-inverse border-bottom text-gray" (click)="d.toggle();forma.get('place_t').reset()" type="button"> <i class="fa fa-calendar"></i> </button>
+								<button (click)="d.toggle();forma.get('place_t').reset()" class="btn btn-outline-inverse border-bottom text-gray" type="button"> <i class="fa fa-calendar"></i> </button>
 							</div>
 						</div>
 						<label for="date_t">Día</label>
@@ -199,8 +310,7 @@
 				
 				<div class="col-lg-6">
 					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('place_t').errors?.required && forma.get('place_t').touched }">
-						<ng-select [items]="places"
-							(change)="forma.get('turno_t').reset()"
+						<ng-select [items]="places_t"
 							[selectOnTab]="true"
 							[loading]="cargandoP"
 							bindValue="_id"
@@ -263,12 +373,50 @@
 					</div>
 				</div>
 				
-				<div class="col-lg-6">
+				<!-- <div class="col-md-6 col-lg-3 d-none">
 					<div class="form-group">
 						<input formControlName="sena_t" id="sena_t" name="sena_t" class="form-control" type="number">
 						<label for="sena_t">Seña <span class="text-danger">*</span></label>
 					</div>
 				</div>
+				
+				<div class="col-md-6 col-lg-3">
+					<div class="form-group">
+						<input formControlName="sena_t_disabled" id="sena_t_disabled" name="sena_t_disabled" class="form-control" type="number">
+						<label for="sena_t_disabled">Seña <span class="text-danger">*</span></label>
+					</div>
+				</div>
+
+				<div class="col-md-6 col-lg-3 d-none">
+					<div class="form-group form-select" [ngClass]="{'has-danger': forma.get('sena_m').errors?.required && forma.get('sena_m').touched }">
+						<1!-- <input formControlName="sena_m" id="sena_m" name="sena_m" class="form-control" type="number"> --1>
+						<ng-select
+							[disabled]="true"
+							[selectOnTab]="true"
+							notFoundText="No se encontraron resultados"
+							formControlName="sena_m"
+							name="sena_m"
+							class="p-0">
+							<ng-option value="Debito">Débito</ng-option>
+							<ng-option value="Efectivo">Efectivo</ng-option>
+							<ng-option value="Tarjeta">Tarjeta</ng-option>
+							<ng-option value="Transferencia">Transferencia</ng-option>
+						</ng-select>
+						<label for="sena_m">Seña Medio de pago <span class="text-danger">*</span></label>
+						
+						<div *ngIf="forma.get('sena_m').errors?.required && forma.get('sena_m').touched" class="small text-danger">
+							Este campo es requerido
+						</div>
+					</div>
+					
+				</div>
+
+				<div class="col-md-6 col-lg-3">
+					<div class="form-group" [ngClass]="{'has-danger': forma.get('sena_m_disabled').errors?.required && forma.get('sena_m_disabled').touched }">
+						<input formControlName="sena_m_disabled" id="sena_m_disabled" name="sena_m_disabled" class="form-control" type="text">
+						<label for="sena_m">Seña Medio de pago <span class="text-danger">*</span></label>
+					</div>
+				</div> -->
 				
 				<div class="col-lg-6">
 					<div class="form-group">
@@ -291,7 +439,7 @@
 	</div>
 </ngx-smart-modal>
 
-<ngx-smart-modal #fTm (onAnyCloseEvent)="resetFinalizar()" identifier="fTm" [closable]="false">
+<ngx-smart-modal #fTm (onAnyCloseEvent)="resetFinalizar()" identifier="fTm" [closable]="false" [dismissable]="false">
 	
 	<div class="modal-header px-0 pt-0 pb-2 m-0">
 		<h6 class="modal-title"> {{ titleModal }} </h6>
@@ -309,7 +457,7 @@
 				<div class="col-md-6">
 					<h6 class="mr-t-0">{{ fTm.getData().client_c.nombre }} {{ fTm.getData().client_c.apellido }}</h6>
 					
-					<span><i class="far fa-fw fa-calendar-check"></i>&nbsp;Fecha: <strong>{{ fTm.getData().date_t | amLocale:'es' | amFromUtc | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>
+					<span><i class="far fa-fw fa-calendar-check"></i>&nbsp;Fecha: <strong>{{ fTm.getData().date_t | amFromUtc | amLocale:'es' | amDateFormat:'D[ de ]MMMM[, de ]YYYY' }}</strong></span>
 					<br><span><i class="far fa-fw fa-clock"></i>&nbsp;Turno: <strong>{{ fTm.getData().turno_t.name }} {{ fTm.getData().turno_t.from }} - {{ fTm.getData().turno_t.to }}</strong></span>
 					<br><span><i class="fas fa-fw fa-check-double"></i>&nbsp;Combo: <strong>{{ fTm.getData().combo_t.name }}</strong></span>
 					<br><span><i class="fas fa-fw fa-info-circle"></i>&nbsp;Detalles: <strong>{{ fTm.getData().detalles_t }}</strong></span>
@@ -319,7 +467,7 @@
 				<div class="col-md-6 text-right">
 					<h6 class="mr-t-0">Antendió:</h6>
 					<span> {{ fTm.getData().usuario.nombre }}&nbsp;<i class="fas fa-fw fa-headset"></i></span>
-					<br><span> {{ fTm.getData().createrAt | amLocale:'es' | amFromUtc | amDateFormat:'DD/MM/YYYY HH:mm' }}&nbsp;<i class="far fa-fw fa-clock"></i></span>
+					<br><span> {{ fTm.getData().createdAt | amFromUtc | amLocale:'es' | amDateFormat:'DD/MM/YYYY HH:mm' }}&nbsp;<i class="far fa-fw fa-clock"></i></span>
 					<ng-container *ngIf="fTm.getData().medio_c">
 						<br><span> {{ fTm.getData().medio_c }}&nbsp;<i class="fas fa-fw fa-share-alt"></i></span>
 						<br><span> {{ fTm.getData().como_c }}&nbsp;<i class="fas fa-fw fa-search"></i></span>
@@ -342,7 +490,8 @@
 					<div class="form-group form-select">
 						
 						<ng-select [items]="extras"
-							(change)="calcularTotal(fTm.getData())"
+							(add)="addExtra($event, fTm.getData())"
+							(remove)="removeExtra($event, fTm.getData())"
 							[selectOnTab]="true"
 							[multiple]="true"
 							[closeOnSelect]="false"
@@ -359,17 +508,17 @@
 					
 				</div>
 				
-				<div class="col-lg-4">
+				<!-- <div class="col-lg-4">
 					<div class="form-group">
-						<input formControlName="efectivo" type="number" name="efectivo" class="form-control">
-						<label for="efectivo">Efectivo</label>
+						<input formControlName="e_monto" type="number" name="e_monto" class="form-control">
+						<label for="e_monto">Efectivo</label>
 					</div>
 				</div>
 				
 				<div class="col-lg-4">
 					<div class="form-group">
-						<input formControlName="tarjeta" type="number" name="tarjeta" class="form-control">
-						<label for="tarjeta">Tarjeta</label>
+						<input formControlName="t_monto" type="number" name="t_monto" class="form-control">
+						<label for="t_monto">Tarjeta</label>
 					</div>
 				</div>
 				
@@ -378,12 +527,11 @@
 						<input formControlName="transferencia" type="number" name="transferencia" class="form-control">
 						<label for="transferencia">Transferencia</label>
 					</div>
-				</div>
+				</div> -->
 				
 				<div class="col-lg-12">
 					
 					<table class="table table-sm table-hover">
-						
 						<thead>
 							<tr>
 								<th>Producto</th>
@@ -394,17 +542,21 @@
 						</thead>
 						<tbody>
 							<tr>
-								<td>Seña</td>
-								<td>{{ fTm.getData().sena_m }}</td>
-								<td class="text-right"> 1 </td>
-								<td class="text-right">$ ({{ fTm.getData().sena_t }})</td>
-							</tr>
-							<tr>
 								<td>{{ fTm.getData().combo_t.name }}</td>
 								<td>{{ fTm.getData().combo_t.desc }}</td>
 								<td class="text-right"> 1 </td>
 								<td class="text-right">$ {{ fTm.getData().combo_t.price }}</td>
 							</tr>
+						</tbody>
+						<tbody *ngFor="let p of fTm.getData().pago">
+							<tr *ngFor="let e of p.extras">
+								<td> {{ e.name }} </td>
+								<td> {{ e.desc }} </td>
+								<td class="text-right"> {{ e.cant }} </td>
+								<td class="text-right">$ {{ e.total }} </td>								
+							</tr>
+						</tbody>
+						<tbody>
 							<ng-container *ngIf="formaFinalizar.value.extras">
 								<tr *ngFor="let p of misExtras; let i = index">
 									<td>{{ p.name }}</td>
@@ -417,14 +569,49 @@
 							</ng-container>
 						</tbody>
 						<tfoot>
-						<tr>
-							<td></td>
-							<td></td>
-							<td class="text-right font-weight-bold">Total:</td>
-							<td class="text-right font-weight-bold">$ {{ sumaTotal }}</td>
-						</tr>
+							<tr>
+								<td></td>
+								<td></td>
+								<td class="text-right text-nowrap font-weight-bold">Total:</td>
+								<td class="text-right font-weight-bold">$ {{ sumaTotal }}</td>
+							</tr>
 						</tfoot>
-						
+					</table>
+					
+					<!-- pagos realizados -->
+					<table class="table table-sm table-hover bg-facebook-contrast">
+						<thead>
+							<tr>
+								<th>Pagos realizados</th>
+								<th>Medio de pago</th>
+								<th>Descripción</th>
+								<!-- <th class="text-right" width="100px">Cantidad</th> -->
+								<th class="text-right">Subtotal</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr *ngFor="let p of fTm.getData().pago">
+								<td>{{ p.createdAt | amLocale:'es' | amDateFormat:'DD/MM/YYYY HH:mm' }}</td>
+								<td> {{ p.medio }} </td>
+								<td>
+									{{ p.detalles }}
+									<!-- <span class="small text-facebook" *ngIf="p.extras && p.extras.length">
+										<b>extras: </b><span *ngFor="let e of p.extras" class="d-inline-block mr-1">({{ e.name }} x{{ e.cant}})</span>
+									</span> -->
+								</td>
+								<!-- <td class="text-right"> 1 </td> -->
+								<td class="text-right">$ {{ p.total }}</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td></td>
+								<td></td>
+								<!-- <td></td> -->
+								<td class="text-right text-nowrap font-weight-bold">Falta:</td>
+								<td class="text-right font-weight-bold">$ {{ sumaTotalPagos }}</td>
+							</tr>
+						</tfoot>
 					</table>
 					
 				</div>
@@ -432,7 +619,8 @@
 				<!-- submit -->
 				<div class="col-lg-12">
 					<div class="text-right">
-						<button [disabled]="!formaFinalizar.valid" class="btn btn-primary d-flex float-right ml-2" type="submit">Finalizar</button>
+						<!-- <button [disabled]="!formaFinalizar.valid" class="btn btn-primary d-flex float-right ml-2" type="submit">Finalizar</button> -->
+						<button (click)="openPago(formaFinalizar.value)" class="btn btn-primary d-flex float-right ml-2" type="button">Realizar pago</button>
 					</div>
 				</div>
 				
@@ -440,4 +628,241 @@
 		</div>
 		
 	</div>
+</ngx-smart-modal>
+
+<ngx-smart-modal #rPm (onAnyCloseEvent)="formaPago.reset()" identifier="rPm" [closable]="false" [dismissable]="false">
+	
+	<div class="modal-header px-0 pt-0 pb-2 m-0">
+		<h6 class="modal-title">Realizar pago</h6>
+		<button (click)="rPm.close()" type="button" class="close" data-dismiss="modal" aria-label="Close" >
+		<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	
+	<div class="modal-body pb-0">
+
+		<form novalidate [formGroup]="formaPago" (ngSubmit)="guardarPago()" class="form-horizontal form-material">
+			
+			<div class="row">
+				
+				<div class="col-sm-12">
+					
+					<div class="row animated fadeIn">
+				
+						<div class="col-lg-6 d-none">
+							<div class="form-group">
+								<input formControlName="consulta_id" id="consulta_id" name="consulta_id" class="form-control" type="text">
+								<label for="consulta_id">consulta_id</label>
+							</div>
+						</div>
+						
+						<div class="col-lg-4">
+							<div class="form-group form-select">
+								<ng-select
+									[selectOnTab]="true"
+									notFoundText="No se encontraron resultados"
+									formControlName="medio_pago"
+									name="medio_pago"
+									class="p-0">
+									<ng-option value="Efectivo">Efectivo</ng-option>
+									<ng-option value="Tarjeta">Tarjeta</ng-option>
+									<ng-option value="Transferencia">Transferencia</ng-option>
+								</ng-select>
+								<label for="medio_pago">Medio de pago <span class="text-danger">*</span></label>
+							</div>
+						</div>
+						
+						<ng-container *ngIf="formaPago.value.medio_pago == 'Tarjeta'">
+							
+							<div class="col-lg-4">
+								<div class="form-group form-select">
+									<ng-select
+										[selectOnTab]="true"
+										notFoundText="No se encontraron resultados"
+										formControlName="t_tipo"
+										name="t_tipo"
+										class="p-0">
+										<ng-option value="Débito">Débito</ng-option>
+										<ng-option value="Crédito">Crédito</ng-option>
+									</ng-select>
+									<label for="t_tipo">Tipo <span class="text-danger">*</span></label>
+								</div>
+							</div>
+							
+							<div class="col-lg-4">
+								<div class="form-group form-select">
+									<ng-select
+										[selectOnTab]="true"
+										notFoundText="No se encontraron resultados"
+										formControlName="t_marca"
+										name="t_marca"
+										class="p-0">
+										<ng-option value="Visa">Visa</ng-option>
+										<ng-option value="MasterCard">MasterCard</ng-option>
+									</ng-select>
+									<label for="t_marca">Marca <span class="text-danger">*</span></label>
+								</div>
+							</div>
+							
+							<div class="col-lg-4">
+								<div class="form-group">
+									<input formControlName="t_recargo" id="t_recargo" name="t_recargo" type="number" class="form-control">
+									<label for="t_recargo">Recargo % <span class="text-danger">*</span></label>
+								</div>
+							</div>
+							
+							<div class="col-lg-4">
+								<div class="form-group">
+									<input formControlName="t_cuotas" id="t_cuotas" name="t_cuotas" type="number" class="form-control">
+									<label for="t_cuotas">Cuotas <span class="text-danger">*</span></label>
+								</div>
+							</div>
+							
+						</ng-container>
+						
+						<div *ngIf="formaPago.value.medio_pago == 'Efectivo'" class="col-lg-4">
+							<div class="form-group">
+								<input formControlName="dto" id="dto" name="dto" type="number" class="form-control">
+								<label for="dto">Descuento % <span class="text-danger">*</span></label>
+							</div>
+						</div>
+						
+						<div *ngIf="formaPago.value.medio_pago != ''" class="col-lg-4">
+							<div class="form-group">
+								<input formControlName="monto" id="monto" name="monto" type="number" class="form-control">
+								<label for="monto">Monto <span class="text-danger">*</span></label>
+							</div>
+						</div>
+						
+						<div *ngIf="formaPago.value.medio_pago != ''" class="col-lg-4">
+							<div class="form-group">
+								<textarea formControlName="detalles" id="detalles" name="detalles" rows="1" class="form-control"></textarea>
+								<label for="detalles">Detalles</label>
+							</div>
+						</div>
+						
+						<div class="col-lg-12 form-group">
+							<table *ngIf="turnoParaPagar" class="table table-hover table-sm">
+								<thead>
+									<tr>
+										<th colspan="3">RESUMEN</th>
+									</tr>
+								</thead>
+								<tbody>
+									
+									<tr *ngIf="turnoParaPagar.combo_t">
+										<td colspan="2">
+											{{ turnoParaPagar.combo_t.name }}
+											<!-- <i class="fa fa-fw fa-calendar-times-o"></i> Vto: {{ the_cuenta.vto | amLocale:'es' | amDateFormat:'DD/MM/YYYY' }} -->
+											<!-- <span title="Comienzo">
+					                <i class="fa fa-fw fa-calendar-check-o ml-3"></i> {{ the_cuenta.consulta.date_t | amLocale:'es' | amDateFormat:'DD/MM/YYYY' }}
+				            	</span>
+				            	<span [ngClass]="{'text-danger' : the_cuenta.vto < now}" title="Vencimiento">
+				            		<i class="fa fa-fw fa-calendar-times-o ml-3"></i> {{ the_cuenta.vto | amLocale:'es' | amDateFormat:'DD/MM/YYYY' }}
+				            	</span> -->
+										</td>
+										<td class="text-right" >$ {{ turnoParaPagar.combo_t.price }}</td>
+									</tr>
+									
+									<tr *ngFor="let e of misExtras">
+										<td colspan="1">{{ e.name }}</td>
+										<td colspan="1" class="text-right">{{ e.cant }} x $ {{ e.price }}</td>
+										<td class="text-right" >$ {{ e.total }}</td>
+									</tr>
+									
+									<ng-container *ngIf="turnoParaPagar.pago && turnoParaPagar.pago.length > 0" class="card-text">
+										<ng-container *ngFor="let p of turnoParaPagar.pago">
+											<tr *ngIf="!p.deleted" class="small">
+												<td colspan="1">
+													<span *ngIf="p.medio === 'Efectivo'"> Pago (efectivo) </span>
+													<span *ngIf="p.medio === 'Tarjeta'"> Pago (tarjeta) </span>
+													<span *ngIf="p.medio === 'Transferencia'"> Pago (transferencia) </span>
+													
+													registrado: {{ p.createdAt | amLocale:'es' | amDateFormat:'DD/MM/YYYY' }}
+												</td>
+												<td colspan="1" class="text-right"> {{ p.detalles }} </td>												
+												<td class="text-right"> - $ ({{ p.total }}) </td>
+											</tr>
+										</ng-container>
+
+										<tr>
+											<td colspan="2" class="font-weight-bold text-right">Falta:</td>
+											<td class="text-right"> $ {{ sumaTotalPagos }} </td>
+										</tr>
+									</ng-container>
+									
+									<ng-container *ngIf="formaPago.value.medio_pago === 'Efectivo' && formaPago.value.dto">
+										<tr>
+											<td class="text-right small" colspan="2">Descuento en 1 pago efectivo {{ (formaPago.value.dto ? formaPago.value.dto : 0) }}%</td>
+											<td class="text-right small" >- $ ({{ (sumaTotalPagos * (formaPago.value.dto ? formaPago.value.dto : 0)) / 100 }})</td>
+										</tr>
+										<tr>
+											<td class="text-right small" colspan="2">Total con descuento:</td>
+											<td class="text-right small" > $ {{ sumaTotalPagos - ((sumaTotalPagos * (formaPago.value.dto ? formaPago.value.dto : 0)) / 100) }} </td>
+										</tr>
+									</ng-container>
+									
+									<ng-container *ngIf="formaPago.value.medio_pago === 'Tarjeta'">
+										<tr>
+											<td class="text-right small" colspan="2">Recargo {{ formaPago.value.t_recargo ? formaPago.value.t_recargo : 0  }}%</td>
+											<td class="text-right small" >+ $ {{ (sumaTotalPagos * (formaPago.value.t_recargo ? formaPago.value.t_recargo : 0)) / 100 }}</td>
+										</tr>
+										<tr>
+											<td class="text-right small" colspan="2">Total con recargo:</td>
+											<td class="text-right small"> $ {{ sumaTotalPagos + ((sumaTotalPagos * (formaPago.value.t_recargo ? formaPago.value.t_recargo : 0)) / 100) }} </td>
+										</tr>
+									</ng-container>
+									
+									<tr class="h6">
+										<td class="text-right font-weight-bold" colspan="2">Abona:</td>
+										<td class="text-right"> $ {{ formaPago.value.monto }} </td>
+									</tr>
+
+									<tr *ngIf="formaPago.get('monto').valueChanges" class="h5">
+										<td class="text-right small" colspan="2">Debe:</td>
+										
+										<td *ngIf="!formaPago.value.completar && formaPago.value.medio_pago === 'Tarjeta'" class="text-right small" >
+											$ {{ (sumaTotalPagos + ((sumaTotalPagos * (formaPago.value.t_recargo ? formaPago.value.t_recargo : 0)) / 100)) - formaPago.value.monto }}
+										</td>
+										
+										<td *ngIf="!formaPago.value.completar && (formaPago.value.medio_pago === 'Efectivo' || formaPago.value.medio_pago === 'Transferencia')" class="text-right small" >
+											$ {{ sumaTotalPagos - ((sumaTotalPagos * formaPago.value.dto) / 100) === formaPago.value.monto ? 0 : sumaTotalPagos - formaPago.value.monto }}
+										</td>
+										
+										<!-- <td *ngIf="!formaPago.value.completar && (formaPago.value.medio_pago === 'Efectivo' || formaPago.value.medio_pago === 'Transferencia')  && !formaPago.value.dto" class="text-right small" >
+											$ {{ sumaTotalPagos - formaPago.value.monto }}
+										</td> -->
+										
+										<td *ngIf="formaPago.value.completar" class="text-right small" >$ 0</td>
+										
+									</tr>
+								</tbody>
+							</table>
+							
+						</div>
+						
+						<!-- <div class="col-lg-12 form-group">
+							valid: {{ formaPago.valid }}
+							<pre>value: {{ formaPago.value | json }}</pre>
+						</div> -->
+
+						<div class="col-lg-12 form-group mb-0">
+
+							<div class="checkbox checkbox-primary float-left">
+                <label class="checkbox-checked">
+                  <input formControlName="completar" type="checkbox" id="completar"> <span class="label-text">Completar pago</span>
+                </label>
+              </div>
+
+							<input [disabled]="!formaPago.valid" class="btn btn-success float-right" type="submit" name="submit" value="Guardar">
+							
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</form>
+
+	</div>
+
 </ngx-smart-modal>

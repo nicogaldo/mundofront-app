@@ -18,17 +18,23 @@ import { CombosComponent } from './combos/combos.component';
 import { TurnsComponent } from './turns/turns.component';
 import { HorariosComponent } from './horarios/horarios.component';
 import { ClientComponent } from './client/client.component';
-import { EstadisticasComponent } from './estadisticas/estadisticas.component';
 import { ExtrasComponent } from './extras/extras.component';
+
+import { EstadisticasComponent } from './estadisticas/estadisticas.component';
+import { ReservasComponent } from './estadisticas/reservas/reservas.component';
+import { ContactosComponent } from './estadisticas/contactos/contactos.component';
+import { FinalizadosComponent } from './estadisticas/finalizados/finalizados.component';
+import { CajaComponent } from './caja/caja.component';
+import { PaymentsComponent } from './payments/payments.component';
 
 // plugins
 import { MomentModule } from 'ngx-moment';
-import { FullCalendarModule } from 'ng-fullcalendar';
+import { FullCalendarModule } from '@fullcalendar/angular';
 import { NgxSmartModalModule } from 'ngx-smart-modal';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { CountUpModule } from 'countup.js-angular2';
-import { ChartsModule } from 'ng2-charts/ng2-charts';
+import { ChartsModule } from 'ng2-charts';
 import { DataTablesModule } from 'angular-datatables';
 
 import localeEs from '@angular/common/locales/es';
@@ -48,6 +54,11 @@ registerLocaleData(localeEs);
 			ClientComponent,
 			EstadisticasComponent,
 			ExtrasComponent,
+			ReservasComponent,
+			ContactosComponent,
+			FinalizadosComponent,
+			CajaComponent,
+			PaymentsComponent,
 		],
 		exports: [
 			DashboardComponent,
